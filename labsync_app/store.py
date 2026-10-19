@@ -40,7 +40,7 @@ class FileRepository(InMemoryRepository):
         os.makedirs(folder, exist_ok=True)
         fd, tmp = tempfile.mkstemp(dir=folder, prefix=".labsync_state.", suffix=".tmp")
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            json.dump(self._state(), fh, sort_keys=True)
+            json.dump(self._state(), fh)  # keep insertion order: tools list records in that order
         os.replace(tmp, self.path)  # atomic: a crash never leaves a half-written file
 
     def _load(self):
