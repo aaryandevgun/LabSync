@@ -1,0 +1,5 @@
+{
+  "name": "labSync",
+  "version": "0.1.0",
+  "description": "LabSync research operations prototype (synthetic demo data). Package shell for importing the repo into C3 Code; the working app is the standalone Python app at the repo root."
+}
