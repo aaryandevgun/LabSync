@@ -254,7 +254,7 @@
         '<div class="composer-foot">' + PROMPTS.map(function (p, i) {
           return '<button type="button" class="prompt-chip" data-prompt="' + i + '">' + esc(p[0]) + "</button>";
         }).join("") + '<span class="spacer"></span><button class="btn primary" id="generate" type="submit" disabled>' + ic("spark", 16) + "Generate plan</button></div></form>" +
-        '<p class="why" id="gen-why">' + (s.mode === "mock" ? "Offline mock agents understand the sample requests (the chips above). Run the server with --live and an API key for free text." : "Describe the instrument, day, duration and supplies.") + "</p>" +
+        '<p class="why" id="gen-why">' + (s.mode === "mock" ? "Offline mock agents understand the chips above and simple requests like \"plate reader for 45 minutes Monday at 10\" (instrument, day, time, length). Run with --live and an API key for any wording." : "Describe the instrument, day, duration and supplies.") + "</p>" +
         '<div id="gen-out" aria-live="polite"></div></section>' +
         '<section class="panel" aria-labelledby="h-upcoming"><div class="panel-h"><h2 id="h-upcoming">Upcoming experiments</h2></div>' +
         (d.plans.length ? '<table><thead><tr><th>Date</th><th>Goal</th><th>Progress</th><th></th></tr></thead><tbody>' + d.plans.map(function (p) {
