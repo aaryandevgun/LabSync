@@ -133,9 +133,9 @@ def main(argv=None):
         api.repo.reset_to_seed()
     if not os.environ.get(RESET_TOKEN_ENV):
         os.environ[RESET_TOKEN_ENV] = secrets.token_urlsafe(9)
-        print("Demo reset token for this run: %s" % os.environ[RESET_TOKEN_ENV])
+        print("Demo reset token for this run: %s" % os.environ[RESET_TOKEN_ENV], flush=True)
     httpd = serve(api, args.host, args.port)
-    print("LabSync local demo · C3 not connected · %s agents · http://%s:%d" % (api.mode, args.host, httpd.server_port))
+    print("LabSync local demo · C3 not connected · %s agents · http://%s:%d" % (api.mode, args.host, httpd.server_port), flush=True)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
