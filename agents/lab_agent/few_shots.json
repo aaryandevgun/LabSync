@@ -1,0 +1,222 @@
+[
+  {
+    "id": "lab-canonical",
+    "description": "Canonical demo request (docs/00): imaging, prep room and supplies.",
+    "context": {
+      "actor_id": "morgan",
+      "lab_id": "lab_moreno",
+      "now": "2026-10-28T10:00:00-05:00"
+    },
+    "input": "I need to image GFP-tagged cells Tuesday morning: three hours on a confocal, a prep room beforehand, and enough anti-GFP antibody and coverslips. I need the results by Wednesday.",
+    "output": {
+      "labId": "lab_moreno",
+      "requesterId": "morgan",
+      "goalSummary": "Confocal GFP imaging of fixed cells Tuesday morning, results by Wednesday",
+      "desiredStart": "2026-11-03T09:00:00-06:00",
+      "preferredEnd": "2026-11-03T13:00:00-06:00",
+      "deadline": "2026-11-04T18:00:00-06:00",
+      "steps": [
+        {
+          "stepId": "prep",
+          "kind": "prep_room",
+          "title": "Sample prep",
+          "durationMinutes": 45,
+          "requiredCapabilities": [
+            "wet_prep"
+          ],
+          "dependsOn": [],
+          "source": "stated",
+          "required": true
+        },
+        {
+          "stepId": "image",
+          "kind": "instrument",
+          "title": "Confocal GFP imaging",
+          "durationMinutes": 180,
+          "requiredCapabilities": [
+            "confocal_imaging",
+            "gfp_imaging"
+          ],
+          "dependsOn": [
+            "prep"
+          ],
+          "source": "stated",
+          "required": true
+        }
+      ],
+      "requiredCapabilities": [],
+      "supplies": [
+        {
+          "skuId": "ANTI_GFP_100",
+          "quantity": 2,
+          "source": "inferred"
+        },
+        {
+          "skuId": "COVERSLIP_24",
+          "quantity": 1,
+          "source": "inferred"
+        }
+      ],
+      "missingInformation": [],
+      "confidence": 0.9
+    },
+    "notes": "The prep room is stated; its 45-minute duration is the default and is called out in the reply. 'Enough' antibody is not a number, so the quantities are inferred for the researcher to confirm."
+  },
+  {
+    "id": "lab-missing-date",
+    "description": "No date given: leave it null and ask, never invent one.",
+    "context": {
+      "actor_id": "morgan",
+      "lab_id": "lab_moreno",
+      "now": "2026-10-28T10:00:00-05:00"
+    },
+    "input": "Can I get the flow cytometer for 2 hours to run my samples?",
+    "output": {
+      "labId": "lab_moreno",
+      "requesterId": "morgan",
+      "goalSummary": "Two hours of flow cytometry analysis",
+      "desiredStart": null,
+      "preferredEnd": null,
+      "deadline": null,
+      "steps": [
+        {
+          "stepId": "flow",
+          "kind": "instrument",
+          "title": "Flow cytometry run",
+          "durationMinutes": 120,
+          "requiredCapabilities": [
+            "flow_analysis"
+          ],
+          "dependsOn": [],
+          "source": "stated",
+          "required": true
+        }
+      ],
+      "requiredCapabilities": [],
+      "supplies": [],
+      "missingInformation": [
+        "desiredStart"
+      ],
+      "confidence": 0.75
+    },
+    "notes": "The scheduler is not called until the user supplies a date."
+  },
+  {
+    "id": "lab-unsupported-capability",
+    "description": "Instrument not in the catalog: no invented capability id.",
+    "context": {
+      "actor_id": "morgan",
+      "lab_id": "lab_moreno",
+      "now": "2026-10-28T10:00:00-05:00"
+    },
+    "input": "Book the cryo-EM for Thursday afternoon, 4 hours.",
+    "output": {
+      "labId": "lab_moreno",
+      "requesterId": "morgan",
+      "goalSummary": "Four-hour cryo-EM session Thursday afternoon",
+      "desiredStart": "2026-11-05T13:00:00-06:00",
+      "preferredEnd": "2026-11-05T17:00:00-06:00",
+      "deadline": null,
+      "steps": [],
+      "requiredCapabilities": [],
+      "supplies": [],
+      "missingInformation": [
+        "No catalog instrument offers cryo-EM; choose another instrument or confirm it is outside LabSync"
+      ],
+      "confidence": 0.6
+    },
+    "notes": "The reply tells the user no listed resource supports cryo-EM."
+  },
+  {
+    "id": "lab-supplies-only-messy",
+    "description": "Informal supplies-only request; unstated quantity marked inferred.",
+    "context": {
+      "actor_id": "morgan",
+      "lab_id": "lab_moreno",
+      "now": "2026-10-28T10:00:00-05:00"
+    },
+    "input": "out of coverslips again lol, can u get 2 boxes + some pbs",
+    "output": {
+      "labId": "lab_moreno",
+      "requesterId": "morgan",
+      "goalSummary": "Restock coverslips and PBS",
+      "desiredStart": null,
+      "preferredEnd": null,
+      "deadline": null,
+      "steps": [],
+      "requiredCapabilities": [],
+      "supplies": [
+        {
+          "skuId": "COVERSLIP_24",
+          "quantity": 2,
+          "source": "stated"
+        },
+        {
+          "skuId": "PBS_1L",
+          "quantity": 1,
+          "source": "inferred"
+        }
+      ],
+      "missingInformation": [],
+      "confidence": 0.8
+    },
+    "notes": "No instrument step, so no date is required. The order goes through supply_create_order_draft only after the user agrees."
+  },
+  {
+    "id": "lab-messy-imaging",
+    "description": "Abbreviations, approximate duration, relative day.",
+    "context": {
+      "actor_id": "morgan",
+      "lab_id": "lab_moreno",
+      "now": "2026-10-28T10:00:00-05:00"
+    },
+    "input": "confocal 2ish hrs next wed aft, need to prep slides first (~30 min), dapi stain",
+    "output": {
+      "labId": "lab_moreno",
+      "requesterId": "morgan",
+      "goalSummary": "Confocal imaging of DAPI-stained slides Wednesday afternoon",
+      "desiredStart": "2026-11-04T13:00:00-06:00",
+      "preferredEnd": "2026-11-04T17:00:00-06:00",
+      "deadline": null,
+      "steps": [
+        {
+          "stepId": "prep",
+          "kind": "prep_room",
+          "title": "Slide prep",
+          "durationMinutes": 30,
+          "requiredCapabilities": [
+            "wet_prep"
+          ],
+          "dependsOn": [],
+          "source": "stated",
+          "required": true
+        },
+        {
+          "stepId": "image",
+          "kind": "instrument",
+          "title": "Confocal imaging",
+          "durationMinutes": 120,
+          "requiredCapabilities": [
+            "confocal_imaging"
+          ],
+          "dependsOn": [
+            "prep"
+          ],
+          "source": "stated",
+          "required": true
+        }
+      ],
+      "requiredCapabilities": [],
+      "supplies": [
+        {
+          "skuId": "DAPI_1ML",
+          "quantity": 1,
+          "source": "inferred"
+        }
+      ],
+      "missingInformation": [],
+      "confidence": 0.7
+    },
+    "notes": "'2ish hours' becomes 120 minutes. There is no deadline, so the scheduler searches two days from the start."
+  }
+]
