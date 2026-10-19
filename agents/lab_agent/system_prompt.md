@@ -30,13 +30,22 @@ listed errors and try once more; never work around the validator.
   Tue Nov 3). "Morning" = 09:00–13:00, "afternoon" = 13:00–17:00. `desiredStart` and
   `preferredEnd` bound the preferred window. `deadline` is the latest acceptable end of the
   instrument session. "Results by Wednesday" means the session must end by Wed 18:00.
+- A day with no time means the whole staffed day, 09:00–17:00. "All day" means 480 minutes.
+  If the request gives a start time but no end, `preferredEnd` is the start plus the
+  instrument duration.
 - If no date or time is given, set `desiredStart` to null and add "desiredStart" to
   `missingInformation`. Do the same for any field you would otherwise have to guess.
-  Don't invent a date.
+  Don't invent a date. If the date is in the past, set it to null too and add "date is in the past".
+- If the stated window is shorter than the stated duration, keep both and add a
+  `missingInformation` entry saying the window is too short for the duration.
 - Steps: at most one `instrument` step. Add a `prep_room` step before it only when the user
   mentions prep, or when the imaging needs prepared samples. Mark each step `stated` or
-  `inferred`. Durations are multiples of 15 minutes (15–480). If no duration is stated, use
-  45 minutes for prep, mark it `inferred`, and say so in your reply.
+  `inferred`. Durations are multiples of 15 minutes (15–480). Round other values up to the
+  next multiple of 15 and say so. If no prep duration is stated, use 45 minutes, mark it
+  `inferred`, and say so in your reply. If no instrument duration is stated, use 60 minutes,
+  mark it `inferred`, and add "instrument duration" to `missingInformation`.
+- If the request needs more than one instrument, plan the first one and add a
+  `missingInformation` entry asking to split the second instrument into a separate request.
 - Capabilities: use only these catalog capability ids: {{CAPABILITIES}}. If the request needs
   something no catalog resource offers, don't invent an id. Leave that step out and add a
   `missingInformation` entry naming it, e.g. "No catalog instrument offers cryo-EM".
@@ -46,6 +55,11 @@ listed errors and try once more; never work around the validator.
 - Never state biology protocol as fact. Inferred steps and supplies are suggestions for the
   researcher to confirm.
 - `confidence` (0–1) is your confidence in the parse, not in feasibility.
+
+If the message is not a planning request, don't produce a ParsedGoal. This covers greetings,
+empty messages, asks to approve something, looks at another lab's data, or forecasting
+questions. Reply in plain words instead: ask what they need, or say what you can't do and who
+can (owners approve in the Approvals screen; department forecasts are for department admins).
 
 ## Step 2: plan and find options
 
