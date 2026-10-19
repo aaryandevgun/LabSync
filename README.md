@@ -36,6 +36,21 @@ An **AI lab operations copilot** helps a grad student/lab manager plan an experi
 
 **C3 first, not C3-branded theater.** Use real C3 Type entities/methods, C3 agents/tools/workflows, C3-native data/UI services, and C3 tracing wherever the team has actual access. Don't hardcode non-existent C3 method signatures. A fallback prototype must be labeled as local simulation and keep the same typed domain contracts for migration. Use grants as an **optional forecasting signal** (fictional award/deadline metadata); do not pretend to read private UW grants or infer permissible uses of grant funds.
 
+## Run it (standalone, no C3)
+
+The team chose to build LabSync as a standalone Python app (stdlib only, Python 3.9+); see `docs/PLAN.md` section 6. It runs locally on synthetic data and is labelled "Local demo · C3 not connected".
+
+```sh
+python3 -m cli demo                 # the full story, pausing for each person's Approve
+python3 -m cli demo --auto          # same, pressing Approve automatically
+python3 -m cli ask "I need to image GFP-tagged cells Tuesday morning: three hours on a confocal, a prep room beforehand, and enough anti-GFP antibody and coverslips. I need the results by Wednesday." --as morgan
+python3 -m cli reset                # put the saved state back to the seed data
+python3 -m evals.run --mock         # score the eval suites (mock agents check the harness, not a model)
+python3 -m pytest tests -q
+```
+
+State is saved to `var/labsync_state.json` (`--memory` keeps it in memory only). By default the agents run on a deterministic offline mock, which only understands the sample requests from the few-shots and evals. To use Claude, set `ANTHROPIC_API_KEY` and add `--live`. The model defaults to `claude-sonnet-5-5`; you can change it with `LABSYNC_MODEL`. In either mode, the agents only parse, advise and write. Every booking, order and recommendation still goes through an Approval made by a person.
+
 ## Top-line definition of done
 
 A judge can watch a researcher request an experiment, see an agent identify a conflict and propose a safe resolution, approve the bookings, then switch to the **same dataset** in the department view and see a cross-lab savings opportunity with a defensible calculation. At least one action is persisted, visible after refresh, and auditable. If C3 access is available, the backend/tool calls visibly execute on C3.
