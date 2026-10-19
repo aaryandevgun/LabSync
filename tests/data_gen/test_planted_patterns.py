@@ -174,12 +174,10 @@ def test_maintenance_window_on_non_confocal_and_unbooked(data):
     assert len(data["maintenance_windows"]) >= 1
     for mw in data["maintenance_windows"]:
         assert not mw["resource_id"].startswith("confocal")
-        start = datetime.strptime(mw["start_local"], "%Y-%m-%d %H:%M")
-        end = datetime.strptime(mw["end_local"], "%Y-%m-%d %H:%M")
+        start, end = _dt(mw["start_local"]), _dt(mw["end_local"])
         for b in data["bookings"]:
             if b["resource_id"] == mw["resource_id"]:
-                s, e = _dt(b["start_local"]).replace(tzinfo=None), _dt(b["end_local"]).replace(tzinfo=None)
-                assert not _overlaps(s, e, start, end), b["booking_id"]
+                assert not _overlaps(_dt(b["start_local"]), _dt(b["end_local"]), start, end), b["booking_id"]
 
 
 # ---------- Phase 1 scene: the Tuesday confocal conflict ----------

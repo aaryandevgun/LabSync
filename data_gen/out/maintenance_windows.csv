@@ -1,2 +1,2 @@
 maintenance_id,resource_id,start_local,end_local,reason,provenance
-mw_plate_reader_1,plate_reader_1,2026-11-05 09:00,2026-11-05 13:00,Annual calibration (synthetic),synthetic:imaging_tuesday_v1
+mw_plate_reader_1,plate_reader_1,2026-11-05T09:00:00-06:00,2026-11-05T13:00:00-06:00,Annual calibration (synthetic),synthetic:imaging_tuesday_v1

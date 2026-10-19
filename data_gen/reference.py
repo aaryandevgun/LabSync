@@ -133,7 +133,7 @@ STOCK = [
 # One non-confocal instrument is down Thursday morning of the demo week.  # assumption: which instrument
 MAINTENANCE_WINDOWS = [
     {"maintenance_id": "mw_plate_reader_1", "resource_id": "plate_reader_1",
-     "start_local": "2026-11-05 09:00", "end_local": "2026-11-05 13:00", "reason": "Annual calibration (synthetic)"},
+     "start_local": "2026-11-05T09:00:00-06:00", "end_local": "2026-11-05T13:00:00-06:00", "reason": "Annual calibration (synthetic)"},
 ]
 
 # Coarse planning signal only, never spending authorization. Restricted visibility.
@@ -153,6 +153,11 @@ POLICIES = [
     {"policy_id": "pol_score_extra_cost", "key": "score.weight.extra_internal_cost_units", "value": -1, "unit": "points_per_unit", "source": "docs/09 A"},
     {"policy_id": "pol_slot_step", "key": "scheduling.slot_step_minutes", "value": 15, "unit": "minutes", "source": "docs/09 A implementation"},
     {"policy_id": "pol_max_options", "key": "scheduling.max_options", "value": 3, "unit": "count", "source": "docs/09 A implementation"},
+    # assumption: owner-move offers land on half-hour marks (gives the docs' 13:30-15:30 shift)
+    {"policy_id": "pol_move_step", "key": "scheduling.move_step_minutes", "value": 30, "unit": "minutes", "source": "assumption"},
+    {"policy_id": "pol_prep_transition", "key": "scheduling.prep_transition_minutes", "value": 15, "unit": "minutes",
+     "source": "docs/00 prep 09:00-09:45 before imaging 10:00"},
+    {"policy_id": "pol_overload", "key": "utilization.overload_threshold", "value": 0.85, "unit": "ratio", "source": "assumption"},
     {"policy_id": "pol_pool_window", "key": "pooling.window_days", "value": 7, "unit": "days", "source": "docs/02 M2.1"},
     {"policy_id": "pol_underuse_threshold", "key": "underuse.utilization_threshold", "value": 0.25, "unit": "ratio", "source": "docs/09 E"},
     {"policy_id": "pol_underuse_weeks", "key": "underuse.min_low_weeks_of_6", "value": 4, "unit": "weeks", "source": "docs/09 E"},

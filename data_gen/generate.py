@@ -75,8 +75,8 @@ def qualified_users(required):
 def _maintenance_blocks():
     blocks = {}
     for mw in ref.MAINTENANCE_WINDOWS:
-        start = datetime.strptime(mw["start_local"], "%Y-%m-%d %H:%M")
-        end = datetime.strptime(mw["end_local"], "%Y-%m-%d %H:%M")
+        start = datetime.fromisoformat(mw["start_local"])
+        end = datetime.fromisoformat(mw["end_local"])
         blocks.setdefault(mw["resource_id"], {})[start.date()] = (start.hour * 60 + start.minute,
                                                                     end.hour * 60 + end.minute)
     return blocks

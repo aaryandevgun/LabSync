@@ -6,6 +6,9 @@ pol_score_owner_move,score.weight.requires_owner_move,-4,points,docs/09 A,synthe
 pol_score_extra_cost,score.weight.extra_internal_cost_units,-1,points_per_unit,docs/09 A,synthetic:imaging_tuesday_v1
 pol_slot_step,scheduling.slot_step_minutes,15,minutes,docs/09 A implementation,synthetic:imaging_tuesday_v1
 pol_max_options,scheduling.max_options,3,count,docs/09 A implementation,synthetic:imaging_tuesday_v1
+pol_move_step,scheduling.move_step_minutes,30,minutes,assumption,synthetic:imaging_tuesday_v1
+pol_prep_transition,scheduling.prep_transition_minutes,15,minutes,docs/00 prep 09:00-09:45 before imaging 10:00,synthetic:imaging_tuesday_v1
+pol_overload,utilization.overload_threshold,0.85,ratio,assumption,synthetic:imaging_tuesday_v1
 pol_pool_window,pooling.window_days,7,days,docs/02 M2.1,synthetic:imaging_tuesday_v1
 pol_underuse_threshold,underuse.utilization_threshold,0.25,ratio,docs/09 E,synthetic:imaging_tuesday_v1
 pol_underuse_weeks,underuse.min_low_weeks_of_6,4,weeks,docs/09 E,synthetic:imaging_tuesday_v1
