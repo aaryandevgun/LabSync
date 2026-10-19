@@ -199,3 +199,19 @@ def test_ties_break_by_start_then_resource():
     ranked = score_swap_options(opts)
     assert [(o["start"], o["resource_id"]) for o in ranked] == [(T % "09:00", "a"), (T % "10:00", "a"),
                                                                 (T % "10:00", "b")]
+
+
+def test_unknown_resource_is_reported(seed):
+    issues = detect_conflicts([{"resource_id": "laser_9", "start": T % "10:00", "end": T % "11:00"}], [],
+                              seed["instruments_by_id"])
+    assert issues == [{"type": "unknown_resource", "ref": 0, "resource_id": "laser_9"}]
+
+
+def test_maintenance_window_excludes_plate_reader_slots(seed):
+    req = canonical_request(requester_id="jordan_patel", lab_id="lab_patel",
+                            required_capabilities=["fluorescence_plate_read"], duration_minutes=60,
+                            search_start="2026-11-05T09:00:00-06:00", search_end="2026-11-05T17:00:00-06:00",
+                            preferred_start=None, preferred_end=None, deadline=None, prep=None)
+    out = run(seed, req)
+    assert out["exclusion_counts"].get("MAINTENANCE_OR_HOURS", 0) > 0
+    assert all(o["start"] >= "2026-11-05T13:00:00-06:00" for o in out["options"])

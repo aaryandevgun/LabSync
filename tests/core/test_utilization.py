@@ -89,3 +89,18 @@ def test_maintenance_hours_leave_the_denominator(seed):
                            seed["maintenance_windows"])
     assert u["maintenance_hours"] == 4 and u["available_hours"] == 36
     assert u["utilization"] == round(u["booked_hours"] / 36, 4)
+
+
+def test_transfer_stops_before_inverting_the_imbalance(seed):
+    rows = post_commit(seed)
+    # Pad Confocal-2's free afternoons (no overlaps) so the second 4h move would flip the imbalance.
+    pads = [("2026-11-02", "12:15"), ("2026-11-03", "15:15"), ("2026-11-04", "13:15"), ("2026-11-06", "12:15")]
+    for i, (day, start) in enumerate(pads):
+        rows.append({"booking_id": "pad_%d" % i, "resource_id": "confocal_2", "lab_id": "lab_chen",
+                     "user_id": "sam_chen", "start_local": "%sT%s:00-06:00" % (day, start),
+                     "end_local": day + "T17:00:00-06:00", "status": "confirmed", "flexible": "false"})
+    plan = plan_transfer(seed["instruments_by_id"]["confocal_1"], seed["instruments_by_id"]["confocal_2"], rows,
+                         seed["persons"], WEEK)
+    assert any(e["reason"] == "WOULD_INVERT_IMBALANCE" for e in plan["excluded"])
+    assert plan["movable_hours"] == 4
+    assert plan["after"]["source_hours"] >= plan["after"]["target_hours"]
