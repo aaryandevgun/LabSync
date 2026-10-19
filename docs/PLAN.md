@@ -125,3 +125,32 @@ Each has my recommended default, and I'll go with it unless you say otherwise.
 ## 5. C3 items I'll leave to C3 Code (named in the handoff prompts, not guessed)
 
 Type syntax and references, Data Integration Canvas loading, how Python tools are registered and whether they can see the repository, structured-output enforcement in Agent Workbench, whether APA can pause for an asynchronous approval and resume, multi-record atomicity, user groups for the demo personas, UI framework components, trace IDs for the UI, and the Agent Evaluation upload format. Each one becomes a "verify first" step in C3_CODE_PROMPTS.md.
+
+## 6. Revision: standalone app, no C3 (Aaryan, Oct 19)
+
+Aaryan chose to build everything without C3, so there is no C3 Code handoff. Deliverables 1–5 are
+unchanged. Deliverables 6 and 7 are replaced:
+
+**Deliverable 6: engine and CLI (`labsync_app/engine`, `cli/`)**
+- The orchestrator replaces APA. It is one Python coordinator for request → Lab Agent → held booking
+  → Conflict Negotiator → approvals → commit → Department Optimizer. People decide at every approval.
+- A pluggable LLM client: Claude API, with the key read from the `ANTHROPIC_API_KEY` env var and the
+  model from `LABSYNC_MODEL`. It also has a deterministic mock mode for offline tests and demos.
+- The agent loop calls tools only through `labsync_tools.registry`, and every structured output passes
+  the `agents/` schema and grounding checks.
+- Durable local storage: the in-memory repository is saved to a JSON file, so state survives a restart,
+  and reset restores the seed.
+- An eval runner sends the three suites through mock or live agents and scores them with `evals/score.py`.
+- The CLI runs the full loop in a terminal (the old deliverable 7).
+
+**Deliverable 7: web app (`labsync_app/web`)**
+- A local server built on Python's stdlib HTTP server, with a JSON API over the tools and queries.
+- One page with three screens from docs/07: My Lab (request → plan → options → propose), Approvals
+  (Chen's card with Approve / Reject / Suggest another time) and Department (three insight cards and
+  the forecast).
+- A persona switcher, demo reset, and a "Local demo · C3 not connected" badge (CLAUDE.md fallback).
+- Plain HTML/CSS/JS with no build step and no runtime downloads, so it works offline.
+- Playwright smoke test of the canonical flow, plus a demo script.
+
+**Dropped:** `c3_handoff/`, and C3 features with no local equivalent: the C3 ML forecasting stretch
+(the baseline forecast stays), Agent Evaluation upload, and C3 deployment.
