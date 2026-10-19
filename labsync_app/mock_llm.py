@@ -1,8 +1,9 @@
 """Deterministic offline stand-in for the LLM, speaking the same message protocol as the live client.
 
 It is a rule-based agent, not a model:
-  * Lab Agent: parses only messages it has a known answer for (agent few-shots and eval
-    references); anything else gets a clarifying reply. Then it calls the same tools a model would.
+  * Lab Agent: uses the known answer for the few-shot and eval sentences, falls back to keyword
+    rules (mock_parse) for other requests, and otherwise asks for the missing details. Then it
+    calls the same tools a model would.
   * Conflict Negotiator: reads the change request and applies fixed rules to the tool's facts.
   * Department Optimizer: calls the snapshot and the three finders, then fills card templates
     with the tool's own numbers.
@@ -13,6 +14,8 @@ import os
 import re
 
 from labsync_core.values import to_dt
+
+from . import mock_parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SUBMIT = "submit_output"
@@ -101,8 +104,13 @@ class MockClient:
         if not history:
             answer = self._known.get((_norm(user), actor))
             if answer is None:
-                return self._say("I couldn't read that request in offline mode. Try the sample request, or tell me "
-                                 "the instrument, day and time, duration and any supplies.")
+                lab = re.search(r"Signed-in person: \S+ in lab (\S+?)\.?\s", system)
+                now = re.search(r"Current time: (\S+?)\.?\s", system)
+                if lab and now:
+                    answer = mock_parse.parse(user, actor, lab.group(1), now.group(1))
+            if answer is None:
+                return self._say("I couldn't find an instrument or supply in that request. Name one (for example "
+                                 "confocal, widefield, plate reader, centrifuge) with a day, time and duration.")
             if "response_kind" in answer:
                 return self._say(answer.get("message", "What would you like to plan?"))
             return self._tool("plan_create_draft", {"parsed_goal": answer})
