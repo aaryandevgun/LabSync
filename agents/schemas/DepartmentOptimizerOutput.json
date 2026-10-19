@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DepartmentOptimizerOutput",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "snapshotId",
+    "weekStart",
+    "dataTimestamp",
+    "cards",
+    "alsoDetected",
+    "notes"
+  ],
+  "properties": {
+    "snapshotId": {
+      "type": "string"
+    },
+    "weekStart": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "dataTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 with offset"
+    },
+    "cards": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "RecommendationCard",
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "insightId",
+          "kind",
+          "headline",
+          "evidenceSentence",
+          "summary",
+          "impact",
+          "evidenceIds",
+          "assumptions",
+          "confidence",
+          "limitations",
+          "exclusions",
+          "requiredApprovals",
+          "nextStep",
+          "advisory"
+        ],
+        "properties": {
+          "insightId": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "pooled_order",
+              "overload_rebalance",
+              "underuse"
+            ]
+          },
+          "headline": {
+            "type": "string",
+            "maxLength": 90
+          },
+          "evidenceSentence": {
+            "type": "string",
+            "maxLength": 220
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 700
+          },
+          "impact": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "value",
+              "unit",
+              "status",
+              "label"
+            ],
+            "properties": {
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "enum": [
+                  "USD",
+                  "hours",
+                  "percent_of_staffed_hours"
+                ]
+              },
+              "status": {
+                "const": "potential"
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 80
+              }
+            }
+          },
+          "evidenceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "exclusions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "ids",
+                "reason"
+              ],
+              "properties": {
+                "ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "requiredApprovals": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "nextStep": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "action",
+              "label"
+            ],
+            "properties": {
+              "action": {
+                "enum": [
+                  "propose_shared_order",
+                  "review_transfer_plan",
+                  "publish_available_capacity"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 60
+              }
+            }
+          },
+          "advisory": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "alsoDetected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "insightId",
+          "note"
+        ],
+        "properties": {
+          "insightId": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

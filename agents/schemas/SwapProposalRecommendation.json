@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SwapProposalRecommendation",
+  "description": "The Conflict Negotiator's recommendation to a booking owner. The owner decides.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "approvalId",
+    "bookingId",
+    "recommendation",
+    "from",
+    "to",
+    "reasons",
+    "ownerImpact",
+    "alternatives",
+    "evidenceIds",
+    "dataTimestamp",
+    "decidedBy"
+  ],
+  "properties": {
+    "approvalId": {
+      "type": "string"
+    },
+    "bookingId": {
+      "type": "string"
+    },
+    "recommendation": {
+      "enum": [
+        "approve",
+        "reject",
+        "suggest_other_time"
+      ]
+    },
+    "from": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 with offset"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 with offset"
+        }
+      }
+    },
+    "to": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 with offset"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 with offset"
+        }
+      }
+    },
+    "reasons": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "string",
+        "maxLength": 200
+      }
+    },
+    "ownerImpact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sameDay",
+        "sameDuration",
+        "personConflicts"
+      ],
+      "properties": {
+        "sameDay": {
+          "type": "boolean"
+        },
+        "sameDuration": {
+          "type": "boolean"
+        },
+        "personConflicts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "alternatives": {
+      "type": "array",
+      "maxItems": 3,
+      "description": "Owner-side time windows to search instead; unverified until the scheduler re-checks them.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "earliestStart",
+          "latestEnd",
+          "note"
+        ],
+        "properties": {
+          "earliestStart": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 with offset"
+          },
+          "latestEnd": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 with offset"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 160
+          }
+        }
+      }
+    },
+    "evidenceIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "dataTimestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 with offset"
+    },
+    "decidedBy": {
+      "const": "owner",
+      "description": "Always the human owner; the agent never decides."
+    }
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ParsedGoal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "labId",
+    "requesterId",
+    "goalSummary",
+    "desiredStart",
+    "preferredEnd",
+    "deadline",
+    "steps",
+    "requiredCapabilities",
+    "supplies",
+    "missingInformation",
+    "confidence"
+  ],
+  "properties": {
+    "labId": {
+      "type": "string"
+    },
+    "requesterId": {
+      "type": "string"
+    },
+    "goalSummary": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "desiredStart": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "Start of the preferred window, ISO 8601 with offset"
+    },
+    "preferredEnd": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "End of the preferred window"
+    },
+    "deadline": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "description": "Latest acceptable end of the instrument session"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stepId",
+          "kind",
+          "title",
+          "durationMinutes",
+          "requiredCapabilities",
+          "dependsOn",
+          "source",
+          "required"
+        ],
+        "properties": {
+          "stepId": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "prep_room",
+              "instrument",
+              "analysis"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 15,
+            "maximum": 480,
+            "multipleOf": 15
+          },
+          "requiredCapabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source": {
+            "enum": [
+              "stated",
+              "inferred"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "supplies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "skuId",
+          "quantity",
+          "source"
+        ],
+        "properties": {
+          "skuId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "source": {
+            "enum": [
+              "stated",
+              "inferred"
+            ]
+          }
+        }
+      }
+    },
+    "missingInformation": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

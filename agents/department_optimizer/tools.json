@@ -1,0 +1,75 @@
+[
+  {
+    "name": "dept_get_snapshot",
+    "effect": "aggregated_read_only",
+    "description": "Permission-filtered department aggregates for one week. Department admins only. Read only.\n\nArgs:\n    actor_id (str): a department admin.\n    week_start (str): Monday, e.g. \"2026-11-02\".\nReturns:\n    {\"status\": \"ok\", \"snapshot_id\", \"week_start\", \"utilization\": [...], \"open_proposals\": {state: n},\n     \"open_orders\": [{\"sku_id\", \"lab_id\", \"quantity\", \"state\"}], \"restricted_signals_count\": n}\n    Funding details are never included; only a count of restricted planning signals.",
+    "parameters": [
+      "week_start"
+    ],
+    "required": [
+      "week_start"
+    ]
+  },
+  {
+    "name": "forecast_resource_demand",
+    "effect": "forecast_write_read",
+    "description": "Baseline next-week demand forecast with backtest error; stores a ForecastRun. Admin only.\n\nArgs:\n    actor_id (str): a department admin.\n    resource_id (str): instrument id.\nReturns:\n    {\"status\": \"ok\", \"forecast_run_id\", \"forecast\": {model_kind, predicted_hours, low, high, mae,\n     method_comparison, backtest, interval_label, ...}}",
+    "parameters": [
+      "resource_id"
+    ],
+    "required": [
+      "resource_id"
+    ]
+  },
+  {
+    "name": "insight_find_pooled_orders",
+    "effect": "read_only",
+    "description": "Detect cross-lab shared-purchase opportunities from current order proposals. Admin only. Read only.\n\nArgs:\n    actor_id (str): a department admin.\nReturns:\n    {\"status\": \"ok\", \"insights\": [{insight_id, kind: \"pooled_order\", estimate: {potential_savings_usd,\n     unpooled_total_usd, pooled_total_usd, volume_component_usd, shipping_component_usd, formula},\n     units: \"USD (potential, not realized)\", required_approvals, assumptions, state}],\n     \"exclusions\": [{sku_id, order_ids, reason}]}",
+    "parameters": [],
+    "required": []
+  },
+  {
+    "name": "insight_find_overloads",
+    "effect": "read_only",
+    "description": "Detect overloaded instruments and concrete, qualified, buffer-safe booking moves to an\nequivalent instrument. Admin only. Read only: moves nothing.\n\nArgs:\n    actor_id (str), week_start (str): Monday, e.g. \"2026-11-02\".\nReturns:\n    {\"status\": \"ok\", \"insights\": [{insight_id, kind: \"overload_rebalance\", estimate: {movable_hours,\n     before, after, total_hours_before, total_hours_after, moves, excluded}, units: \"hours\", state}]}",
+    "parameters": [
+      "week_start"
+    ],
+    "required": [
+      "week_start"
+    ]
+  },
+  {
+    "name": "insight_find_underuse",
+    "effect": "read_only",
+    "description": "Detect persistently underused instruments and matching overflow demand. Admin only. Read only.\nAdvisory: never recommends selling or buying from one week of data. Ranked lowest utilization first.\n\nArgs:\n    actor_id (str), week_start (str): Monday, e.g. \"2026-11-02\".\nReturns:\n    {\"status\": \"ok\", \"insights\": [{insight_id, kind: \"underuse\", estimate: {utilization, booked_hours,\n     available_hours, history, low_weeks, overflow_sources, caveat}, units: \"share of staffed hours\", state}]}",
+    "parameters": [
+      "week_start"
+    ],
+    "required": [
+      "week_start"
+    ]
+  },
+  {
+    "name": "insight_propose_action",
+    "effect": "proposal_only",
+    "description": "Turn a currently detected insight into a proposed action awaiting approvals. Admin only.\nProposal only: no order, booking or visibility change happens; impacted lab owners keep authority.\nThe insight is recomputed from live data first, and its evidence is frozen on the stored record.\n\nArgs:\n    actor_id (str): a department admin.\n    insight_id (str): from one of the insight_find_* tools.\n    week_start (str, optional): the week used for overload/underuse insights.\nReturns:\n    {\"status\": \"ok\", \"insight_id\", \"state\": \"pending_approvals\", \"approvals\": [...]}\n    Errors: NOT_FOUND (not detected in current data), INVALID_TRANSITION (already proposed).",
+    "parameters": [
+      "insight_id",
+      "week_start"
+    ],
+    "required": [
+      "insight_id"
+    ]
+  },
+  {
+    "name": "audit_get_activity",
+    "effect": "read_scoped",
+    "description": "Audit events for a request or entity, scoped to what the actor may see. Read only.\n\nDepartment admins see everything; others see events for their own lab or that they took part in.\n\nArgs:\n    actor_id (str), request_id (str, optional), entity_id (str, optional).\nReturns:\n    {\"status\": \"ok\", \"events\": [{audit_id, actor_id, operation, entity_kind, entity_id, before, after,\n     status, created_at, ...}]} oldest first.",
+    "parameters": [
+      "request_id",
+      "entity_id"
+    ],
+    "required": []
+  }
+]
