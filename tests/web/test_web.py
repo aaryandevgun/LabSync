@@ -52,7 +52,7 @@ def test_page_and_assets_are_served_with_security_headers(server):
     base, _ = server
     with urllib.request.urlopen(base + "/") as resp:
         html = resp.read().decode()
-        assert "Local demo · C3 not connected" in html and "Synthetic campus data" in html
+        assert "C3 not connected" not in html and "Signed in as" in html
         assert "script-src 'self'" in resp.headers["Content-Security-Policy"]
     for asset in ("/static/app.js", "/static/app.css"):
         with urllib.request.urlopen(base + asset) as resp:

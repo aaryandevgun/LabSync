@@ -39,12 +39,13 @@
     var p = S.session && S.session.personas.filter(function (x) { return x.id === id; })[0];
     return p ? p.name : id;
   }
-  /** Agent card text names resources by id (flow_2); show the instrument/room name instead. Display only. */
+  /** Agent card text names resources and supplies by id (flow_2, ANTI_GFP_100); show their names instead. Display only. */
   function named(text) {
-    var names = (S.session && S.session.resource_names) || {};
+    var s = S.session || {}, names = {};
+    [s.resource_names, s.sku_names].forEach(function (m) { Object.keys(m || {}).forEach(function (k) { names[k] = m[k]; }); });
     return Object.keys(names).sort(function (a, b) { return b.length - a.length; }).reduce(function (t, id) {
       return t.replace(new RegExp("\\b" + id + "\\b", "g"), names[id]);
-    }, String(text == null ? "" : text));
+    }, String(text == null ? "" : text)).replace(/, shipping to [a-z]+(_[a-z]+)+/g, "");
   }
   function labOf(id) {
     var p = S.session && S.session.personas.filter(function (x) { return x.lab_id === id; })[0];
@@ -98,7 +99,7 @@
   function errText(d) {
     var msg = d.message || "Something went wrong.";
     if (d.errors && d.errors.length) msg += " " + d.errors.join("; ");
-    return (d.code ? d.code + ": " : "") + msg;
+    return msg;
   }
   function busy(btn, on, label) {
     if (!btn) return;
@@ -107,13 +108,13 @@
   }
   function stateBadge(state) {
     var map = {
-      draft: ["proposed", "Draft"], pending_approvals: ["awaiting", "Pending approvals"], ready: ["info", "Ready to commit"],
+      draft: ["proposed", "Draft"], pending_approvals: ["awaiting", "Pending approvals"], ready: ["info", "Ready to book"],
       confirmed: ["committed", "Confirmed"], needs_revision: ["rejected", "Needs a new option"], failed: ["failed", "Failed"],
       owner_approval_pending: ["awaiting", "Awaiting owner approval"], requester_approval_pending: ["awaiting", "Awaiting your confirmation"],
-      authorized: ["info", "Approved · not committed"], committed: ["committed", "Committed"], rejected: ["rejected", "Rejected"],
-      stale: ["failed", "Stale"], awaiting_lab_approval: ["awaiting", "Proposed · awaiting lab approval"],
-      awaiting_fund_approval: ["awaiting", "Awaiting fund authorization"], approved_request: ["approved", "Approved request · not ordered"],
-      detected: ["proposed", "Proposed by agent"], action_proposed: ["awaiting", "Action proposed"],
+      authorized: ["info", "Approved · ready to book"], committed: ["committed", "Booked"], rejected: ["rejected", "Rejected"],
+      stale: ["failed", "Out of date"], awaiting_lab_approval: ["awaiting", "Waiting for lab approval"],
+      awaiting_fund_approval: ["awaiting", "Awaiting fund authorization"], approved_request: ["approved", "Approved · not ordered"],
+      detected: ["proposed", "New"], action_proposed: ["awaiting", "Action proposed"],
       approved: ["approved", "Approved"], dismissed: ["rejected", "Dismissed"], reviewed: ["info", "Reviewed"],
       pending: ["pending", "Waiting"], not_sent: ["", "Not asked yet"]
     };
@@ -191,10 +192,7 @@
           esc(p.name + " · " + p.role.replace(/_/g, " ")) + "</option>";
       }).join("") + "</optgroup>";
     }).join("");
-    document.getElementById("chip-date").textContent = "Scenario " + fmtDay(s.now) + ", 2026 · America/Chicago";
-    var agents = document.getElementById("chip-agents");
-    agents.innerHTML = '<span class="dot"></span>' + (s.mode === "live" ? "Agents: Claude (" + esc(s.model) + ")" : "Agents: offline mock");
-    agents.className = "chip" + (s.mode === "live" ? " ok" : "");
+    document.getElementById("chip-date").textContent = "Today: " + fmtDay(s.now);
   }
   function navLink(href, icon, label, current, count) {
     return '<a href="' + href + '"' + (current ? ' aria-current="page"' : "") + ">" + ic(icon) + "<span>" + esc(label) + "</span>" +
@@ -248,13 +246,13 @@
       view.innerHTML =
         '<div class="composer-wrap"><div class="stack">' +
         '<section class="panel hero" aria-labelledby="h-compose"><div class="eyebrow">Your lab · ' + esc(d.lab_name) + "</div>" +
-        '<h1 id="h-compose">What are you trying to run?</h1><p class="muted">Tell LabSync your goal. We\'ll assemble the logistics for review.</p>' +
+        '<h1 id="h-compose">What are you trying to run?</h1><p class="muted">Say what you need, when, and for how long. LabSync finds a time and asks the right people.</p>' +
         '<form class="composer" id="compose"><label class="sr-only" for="goal">Describe your experiment</label>' +
         '<textarea id="goal" rows="3" placeholder="Example: Image GFP-tagged cells Tuesday morning...">' + esc(seed) + "</textarea>" +
         '<div class="composer-foot">' + PROMPTS.map(function (p, i) {
           return '<button type="button" class="prompt-chip" data-prompt="' + i + '">' + esc(p[0]) + "</button>";
         }).join("") + '<span class="spacer"></span><button class="btn primary" id="generate" type="submit" disabled>' + ic("spark", 16) + "Generate plan</button></div></form>" +
-        '<p class="why" id="gen-why">' + (s.mode === "mock" ? "Offline mock agents understand the chips above and simple requests like \"plate reader for 45 minutes Monday at 10\" (instrument, day, time, length). Run with --live and an API key for any wording." : "Describe the instrument, day, duration and supplies.") + "</p>" +
+        '<p class="why" id="gen-why">' + "Try an example above, or type something like \"plate reader for 45 minutes Monday at 10\"." + "</p>" +
         '<div id="gen-out" aria-live="polite"></div></section>' +
         '<section class="panel" aria-labelledby="h-upcoming"><div class="panel-h"><h2 id="h-upcoming">Upcoming experiments</h2></div>' +
         (d.plans.length ? '<table><thead><tr><th>Date</th><th>Goal</th><th>Progress</th><th></th></tr></thead><tbody>' + d.plans.map(function (p) {
@@ -280,31 +278,25 @@
       function submit() {
         var out = document.getElementById("gen-out");
         busy(gen, true, "Generating…");
-        out.innerHTML = '<div class="progress"><div class="step">' + ic("clock", 16) + "Lab Agent is reading your request and checking equipment, rooms and supplies…</div></div>";
+        out.innerHTML = '<div class="progress"><div class="step">' + ic("clock", 16) + "Checking equipment, rooms and supplies…</div></div>";
         api("POST", "/api/requests", { text: ta.value }).then(function (r) {
           busy(gen, false); sync();
           if (!r.ok) {
             out.innerHTML = '<div class="banner err">' + ic("alert") + "<div>" + esc(errText(r.data)) +
-              (r.data.code === "LLM_UNAVAILABLE" ? "<br>Nothing was saved. Try again, or run in offline mock mode." : "") + "</div></div>";
+              (r.data.code === "LLM_UNAVAILABLE" ? "<br>Nothing was saved. Please try again." : "") + "</div></div>";
             return;
           }
           S.lastRun = r.data;
           if (r.data.plan_id) { location.hash = "#/plans/" + r.data.plan_id; return; }
-          out.innerHTML = '<div class="agent-reply"><b>Lab Agent</b><br>' + esc(r.data.agent_text || "No plan was created.") + "</div>";
+          out.innerHTML = '<div class="agent-reply">' + esc(r.data.agent_text || "No plan was created.") + "</div>";
         });
       }
     });
   }
 
   // ------------------------------------------------------------------ Screen 2: plan studio
-  var TOOL_WORDS = {
-    catalog_find_resources: "Matched equipment and rooms", resource_check_qualifications: "Checked qualifications",
-    stock_get_availability: "Checked lab stock", supply_quote: "Verified supplies and lead times",
-    plan_create_draft: "Saved the draft plan", scheduler_find_slots: "Checked instrument and room slots"
-  };
-
   function viewPlan(id) {
-    crumbs(["Lab", "Experiments", id]);
+    crumbs(["Lab", "Experiments"]);
     loading();
     api("GET", "/api/plans/" + id).then(function (r) {
       if (!r.ok) {
@@ -354,17 +346,12 @@
 
     var banners = "";
     if (S.lastRun && S.lastRun.plan_id === plan.plan_id) {
-      banners += '<div class="banner info">' + ic("spark") + "<div><b>Lab Agent built this draft.</b> " +
-        S.lastRun.tool_calls.filter(function (n, i, a) { return TOOL_WORDS[n] && a.indexOf(n) === i; }).map(function (n) {
-          return ic("check", 13) + " " + esc(TOOL_WORDS[n]);
-        }).join(" &nbsp; ") + ". Nothing is booked yet.</div></div>";
+      banners += '<div class="banner info">' + ic("spark") + "<div><b>Here's your plan.</b> Pick a time below and press Hold. Nothing is booked yet.</div></div>";
     }
     if (d.receipt) {
-      banners += '<div class="receipt" role="status"><div class="row">' + ic("check") + "<b>Plan committed.</b></div>" +
-        '<p class="small" style="margin-top:6px">Receipt <span class="mono">' + esc(d.receipt.receipt_id) + "</span> · committed by " +
-        esc(person(d.receipt.committed_by)) + " · " + esc(fmtStamp(d.receipt.committed_at)) + "<br>Bookings: " +
-        d.receipt.booking_ids.map(function (b) { return '<span class="mono">' + esc(b) + "</span>"; }).join(", ") +
-        ' · <a href="#/activity/' + esc(plan.request_id) + '">View audit trail</a></p></div><div style="height:16px"></div>';
+      banners += '<div class="receipt" role="status"><div class="row">' + ic("check") + "<b>Booked.</b></div>" +
+        '<p class="small" style="margin-top:6px">Confirmed by ' + esc(person(d.receipt.committed_by)) + " · " + esc(fmtStamp(d.receipt.committed_at)) +
+        ' · <a href="#/activity/' + esc(plan.request_id) + '">View history</a></p></div><div style="height:16px"></div>';
     }
     if (d.proposal && d.proposal.state === "rejected") {
       var rej = d.approvals.filter(function (a) { return a.decision === "reject"; })[0];
@@ -376,13 +363,13 @@
         '<button class="btn sm" data-act="recheck">Recheck plan</button></div></div>';
     }
     if (plan.needs_input && plan.needs_input.length) {
-      banners += '<div class="banner warn">' + ic("info") + "<div><b>The agent needs a few facts before it can search.</b> Highlighted below; edit the plan to fill them in.</div></div>";
+      banners += '<div class="banner warn">' + ic("info") + "<div><b>A few details are missing.</b> Press Edit plan and fill in the highlighted ones.</div></div>";
     }
 
-    var head = '<div class="plan-head"><div><div class="eyebrow">Experiment plan · ' + esc(plan.plan_id) + "</div>" +
+    var head = '<div class="plan-head"><div><div class="eyebrow">Experiment plan</div>' +
       "<h1>" + esc(goal.goalSummary) + "</h1><p class=\"muted\">" + (goal.desiredStart ? esc(fmtDay(goal.desiredStart)) + " · " : "") + esc(d.requester_name) + " · " + esc(d.lab_name) +
       " · " + stateBadge(d.stage) + '</p><div class="stepper" aria-label="Plan progress">' + stepper + "</div></div>" +
-      '<div class="row"><a class="btn" href="#/activity/' + esc(plan.request_id) + '">' + ic("activity", 16) + "View audit trail</a></div></div>";
+      '<div class="row"><a class="btn" href="#/activity/' + esc(plan.request_id) + '">' + ic("activity", 16) + "View history</a></div></div>";
 
     var tabs = '<div class="tabs mtabs" role="tablist" aria-label="Plan sections">' + [["tasks", "Plan"], ["sched", "Schedule"], ["rail", "Approvals"]].map(function (t, i) {
       return '<button role="tab" data-mtab="' + t[0] + '" aria-selected="' + (i === 1) + '">' + t[1] + "</button>";
@@ -401,11 +388,10 @@
       return '<div class="node' + (s.required ? "" : " optional") + '"><div class="k">' + esc(s.kind.replace("_", " ")) + "</div>" +
         "<b>" + esc(s.title) + '</b><div class="small muted">' + esc(s.durationMinutes) + " min" +
         (s.dependsOn.length ? " · after " + esc(s.dependsOn.join(", ")) : "") + (s.required ? "" : " · optional, not scheduled") +
-        (s.source === "inferred" ? " · inferred" : "") + "</div></div>";
+        "" + "</div></div>";
     }).join("") || '<p class="small muted">No instrument or room steps. This plan only requests supplies.</p>';
     var cons = goal.desiredStart ? ["Window " + fmtDay(goal.desiredStart) + " " + hm(goal.desiredStart) + (goal.preferredEnd ? "–" + hm(goal.preferredEnd) : "")] : [];
     if (goal.deadline) cons.push("Results by " + fmtDay(goal.deadline) + " " + hm(goal.deadline));
-    if (d.search && d.search.assumptions) cons = cons.concat(d.search.assumptions);
     var missing = (plan.needs_input || []).length ? '<div class="missing-box"><b>Missing</b><ul class="small">' +
       plan.needs_input.map(function (m) { return "<li>" + esc(m) + "</li>"; }).join("") + "</ul></div>" : "";
     var canEdit = d.is_requester && ["draft", "needs_revision"].indexOf(d.stage) >= 0;
@@ -433,7 +419,7 @@
       }).join("") +
       g.supplies.map(function (s) { return f("e-sku-" + s.skuId, s.skuId + " quantity", s.quantity, "number"); }).join("") +
       '<div class="row"><button class="btn primary" type="submit">Recheck plan</button><button class="btn" type="button" data-act="edit-cancel">Cancel</button></div>' +
-      '<p class="why">Saves a new draft for this request and re-runs the deterministic checks. The agent is not involved.</p></form>';
+      '</form>';
   }
 
   function offset(day, ts) { return ts.slice(19) || (day >= "2026-11-01" ? "-06:00" : "-05:00"); }
@@ -442,14 +428,14 @@
     var options = rankedOptions(d, search);
     var tl = d.timeline, html = "";
     html += '<div class="panel"><div class="panel-h"><h2 id="h-sched">2. Schedule &amp; options</h2>' +
-      '<label class="toggle"><input type="checkbox" id="buffers"' + (S.buffers ? " checked" : "") + "> Turnaround buffers</label></div>" +
+      '<label class="toggle"><input type="checkbox" id="buffers"' + (S.buffers ? " checked" : "") + "> Show cleaning time</label></div>" +
       '<div class="panel-b">';
     if (!d.goal.steps.some(function (s) { return s.kind === "instrument"; })) {
       html += '<div class="empty"><b>Nothing to book</b>This is a supplies-only request. Draft the supply requests on the right.</div>';
     } else if (!tl.day) {
       html += '<div class="empty"><b>No day yet</b>Press Edit plan and add a day to see the schedule.</div>';
     } else {
-      html += '<p class="small muted" style="margin-bottom:8px">' + esc(fmtDay(tl.day)) + " · other labs' bookings show as busy without names</p>" +
+      html += '<p class="small muted" style="margin-bottom:8px">' + esc(fmtDay(tl.day)) + "</p>" +
         '<div class="tl-scroll"><div class="tl" role="group" aria-label="Instrument and room timeline">' + timeline(d, option, prop) + "</div></div>" +
         '<div class="tl-legend"><span><i class="lg-mine"></i>Confirmed (your lab)</span><span><i class="lg-busy"></i>Booked (other lab)</span>' +
         '<span><i class="lg-held"></i>Proposed / held</span><span><i class="lg-conf"></i>Conflict or owner shift awaiting approval</span>' +
@@ -459,18 +445,18 @@
 
     var done = prop && prop.state === "committed";
     if (prop) {
-      html += '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>' + (done ? "Committed proposal " : "Held proposal ") + esc(prop.proposal_id) + "</h3>" + stateBadge(prop.state) + '</div><div class="panel-b small">' +
+      html += '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>' + (done ? "Booked" : "Your hold") + "</h3>" + stateBadge(prop.state) + '</div><div class="panel-b small">' +
         prop.creates.map(function (c) { return "<div>" + esc(resName(d, c.resource_id)) + " · " + esc(range(c.start, c.end)) + " · <span class=\"muted\">" + (done ? "booked" : "held, not booked") + "</span></div>"; }).join("") +
         prop.contingent_moves.map(function (m) {
           return '<div style="margin-top:6px">' + ic("arrow", 13) + " " + esc(labOf(m.lab_id)) + "'s booking " + (done ? "moved " : "moves ") + esc(range(m.from.start, m.from.end)) + " → " + esc(range(m.to.start, m.to.end)) + (done ? " with their approval" : " if they approve") + "</div>";
         }).join("") + (!done && d.is_requester ? '<div class="row" style="margin-top:10px"><button class="btn sm danger" data-act="release">' + ic("x", 14) + "Release hold</button>" +
           '<span class="why">Frees these slots and withdraws the approval requests. Nothing confirmed changes.</span></div>' : "") + "</div></div>";
     } else if (search) {
-      html += '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Options</h3><span class="small muted">Ranked by the deterministic scheduler</span></div><div class="panel-b">';
+      html += '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Options</h3><span class="small muted">Best first</span></div><div class="panel-b">';
       if (!search.options.length) {
         var why = { BOOKED: "slots already booked", NOT_QUALIFIED: "instruments you aren't certified on", CAPABILITY_MISMATCH: "instruments that can't do this",
           MAINTENANCE_OR_HOURS: "times outside staffed hours or in maintenance", NO_PREP_ROOM: "times with no free prep room", NO_MOVE_SLOT_FOR_OWNER: "owner sessions with nowhere to move" };
-        html += '<div class="banner warn">' + ic("alert") + "<div><b>Nothing free in this window.</b> The synthetic week is busy. Ruled out: " +
+        html += '<div class="banner warn">' + ic("alert") + "<div><b>Nothing free at that time.</b> Ruled out: " +
           esc(Object.keys(search.exclusion_counts || {}).filter(function (k) { return k !== "CAPABILITY_MISMATCH"; }).map(function (k) { return search.exclusion_counts[k] + " " + (why[k] || k.toLowerCase().replace(/_/g, " ")); }).join(", ") || "no matching slots") +
           ". Try another day with Edit plan, or a shorter session.</div></div>";
       } else {
@@ -482,7 +468,7 @@
             '<div class="small">' + (o.prep ? "Prep in " + esc(resName(d, o.prep.resource_id)) + " " + esc(range(o.prep.start, o.prep.end)) + " · " : "") +
             (o.features.meets_preferred_window ? "Within your preferred window" : esc(o.features.hours_late) + " h later than preferred") + "</div>" +
             '<div class="small">' + (moves.length ? '<span class="badge awaiting">Needs owner approval</span> ' + esc(moves.join("; ")) : '<span class="badge ok">No one else moves</span>') + "</div>" +
-            '<div class="small muted">Approvals: ' + esc(o.approvals_required.map(person).join(", ")) + " · score " + esc(o.score) + "</div></button>";
+            '<div class="small muted">Needs an OK from: ' + esc(o.approvals_required.map(person).join(", ")) + "</div></button>";
         }).join("") + "</div>";
         var directIdx = options.map(function (o) { return o.kind; }).indexOf("direct");
         if (options[0].kind !== "direct" && directIdx > 0) {
@@ -490,12 +476,12 @@
         }
         if (d.is_requester) {
           html += '<div class="row" style="margin-top:12px"><button class="btn primary" data-act="hold">' + ic("check", 16) + "Hold " + esc(option ? "option " + (options.indexOf(option) + 1) : "option") + "</button>" +
-            '<span class="why">Holding reserves nothing: it creates a proposal that waits for approvals.</span></div>';
+            '<span class="why">Keeps this time for you while approvals come in. Nothing is booked yet.</span></div>';
         }
       }
       if (search.blocked_alternatives && search.blocked_alternatives.length) {
         html += '<div class="stack s8" style="margin-top:12px">' + search.blocked_alternatives.map(function (b) {
-          return '<div class="blocked">' + ic("x", 13) + " <b>" + esc(resName(d, b.resource_id)) + "</b> requires certification (" + esc(b.missing.join(", ")) + "). " + esc(b.detail) + "</div>";
+          return '<div class="blocked">' + ic("x", 13) + " <b>" + esc(resName(d, b.resource_id)) + "</b> requires certification that " + esc(person(d.plan.requester_id)) + " doesn't have yet.</div>";
         }).join("") + "</div>";
       }
       html += "</div></div>";
@@ -503,6 +489,7 @@
     return html;
   }
 
+  function skuName(id) { return (S.session && S.session.sku_names || {})[id] || id; }
   function resName(d, id) {
     var r = d.timeline.resources.filter(function (x) { return x.id === id; })[0];
     return r ? r.name : id;
@@ -532,7 +519,7 @@
           var ours = moveTarget ? moveIds.indexOf(moveTarget) >= 0 && !!prop : mineIds.indexOf(raw) >= 0;
           if (ours && moveTarget) return;  // drawn below as the owner's proposed new time
           b.cls = "held"; b.title = ours ? "Proposed · " + person(d.plan.requester_id) : r.user_id ? "Your lab · held" : "Held by another request";
-          b.detail = ours ? "Held for proposal " + prop.proposal_id + ", not booked. It becomes a booking only after every approval and the commit." :
+          b.detail = ours ? "Held for you, not booked yet. It's booked once everyone approves and you press Commit plan." :
             r.user_id ? person(r.user_id) + " is holding this slot for another plan in your lab. Open that plan and press Release hold if it's not needed." :
             "Another lab's request is holding this slot. It is not confirmed.";
         } else if (move && !committed) {
@@ -553,7 +540,7 @@
       }
       if (option && !prop) {
         [[option.resource_id, option.start, option.end, "Imaging"], option.prep ? [option.prep.resource_id, option.prep.start, option.prep.end, "Prep"] : null].forEach(function (x) {
-          if (x && x[0] === res.id) blocks.push({ start: x[1], end: x[2], cls: "preview", title: "Option · " + x[3], detail: "Selected option, not held yet. Press Hold to create a proposal." });
+          if (x && x[0] === res.id) blocks.push({ start: x[1], end: x[2], cls: "preview", title: "Option · " + x[3], detail: "Selected option, not held yet. Press Hold to keep this time." });
         });
       }
       (tl.maintenance || []).filter(function (m) { return m.resource_id === res.id; }).forEach(function (m) {
@@ -606,7 +593,7 @@
     if (prop && d.is_requester && prop.state !== "committed") {
       var can = prop.state === "authorized";
       html += '<div class="sticky-foot"><button class="btn primary" data-act="commit"' + (can ? "" : " disabled") + ' aria-describedby="commit-why">' + ic("check", 16) + "Commit plan</button>" +
-        '<ul class="why" id="commit-why">' + (can ? "<li>All approvals are in. Commit re-checks the calendar before writing.</li>" :
+        '<ul class="why" id="commit-why">' + (can ? "<li>Everyone has approved. Press Commit plan to book it.</li>" :
           d.commit_blockers.map(function (b) { return "<li>" + esc(b) + "</li>"; }).join("")) + "</ul></div>";
     }
     html += supplies(d) + "</div></div>";
@@ -616,12 +603,12 @@
   function supplies(d) {
     var q = d.quote && d.quote.status === "ok" ? d.quote : null;
     if (!q && !d.orders.length) return '<div><div class="eyebrow">Supplies</div><p class="small muted">No supplies in this plan.</p></div>';
-    var html = '<div><div class="row between"><div class="eyebrow">Supplies</div><span class="badge">Estimate · synthetic prices</span></div>';
+    var html = '<div><div class="row between"><div class="eyebrow">Supplies</div><span class="badge">Estimate</span></div>';
     if (q) {
       var rd = q.readiness;
       html += '<table class="quote small" style="margin-top:8px"><thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Unit</th><th class="n">Subtotal</th></tr></thead><tbody>' +
-        q.quote.lines.map(function (l) { return "<tr><td>" + esc(l.sku_id) + '</td><td class="n">' + l.quantity + '</td><td class="n">' + usd(l.unit_price_usd) + '</td><td class="n">' + usd(l.subtotal_usd) + "</td></tr>"; }).join("") +
-        Object.keys(q.quote.shipping_by_vendor).map(function (v) { return '<tr><td class="muted">Shipping · ' + esc(v) + '</td><td></td><td></td><td class="n">' + usd(q.quote.shipping_by_vendor[v]) + "</td></tr>"; }).join("") +
+        q.quote.lines.map(function (l) { return "<tr><td>" + esc(skuName(l.sku_id)) + '</td><td class="n">' + l.quantity + '</td><td class="n">' + usd(l.unit_price_usd) + '</td><td class="n">' + usd(l.subtotal_usd) + "</td></tr>"; }).join("") +
+        Object.keys(q.quote.shipping_by_vendor).map(function (v) { return '<tr><td class="muted">Shipping · ' + esc((S.session.vendor_names || {})[v] || v) + '</td><td></td><td></td><td class="n">' + usd(q.quote.shipping_by_vendor[v]) + "</td></tr>"; }).join("") +
         '<tr><td><b>Estimated total</b></td><td></td><td></td><td class="n"><b>' + usd(q.quote.total_usd) + "</b></td></tr></tbody></table>";
       if (rd) {
         html += '<p class="small" style="margin-top:8px">' + (rd.status === "order_needed" ? '<span class="badge awaiting">Order needed</span> ' : stateBadge(rd.status)) +
@@ -631,7 +618,7 @@
     }
     if (d.orders.length) {
       html += '<ul class="list" style="margin-top:8px">' + d.orders.map(function (o) {
-        return '<li class="small"><div class="row between"><span>' + esc(o.sku_id) + " ×" + esc(o.quantity) + ' <span class="mono muted">' + esc(o.order_id) + "</span></span>" + stateBadge(o.state) + "</div></li>";
+        return '<li class="small"><div class="row between"><span>' + esc(skuName(o.sku_id)) + " ×" + esc(o.quantity) + "</span>" + stateBadge(o.state) + "</div></li>";
       }).join("") + '</ul><p class="why">Requests only. Nothing is ordered, charged or emailed.</p>';
     } else if (d.is_requester && q) {
       html += '<button class="btn sm" data-act="orders" style="margin-top:8px">' + ic("pkg", 14) + "Draft supply requests</button>" +
@@ -698,7 +685,7 @@
       busy(btn, true, "Holding…");
       api("POST", "/api/plans/" + plan.plan_id + "/hold", { option_id: option.option_id }).then(function (r) {
         if (!r.ok) { busy(btn, false); toast(errText(r.data), true); return; }
-        toast("Option held as proposal " + r.data.proposal_id + ". Nothing is booked yet.");
+        toast("Time held. Nothing is booked until everyone approves.");
         reload();
       });
     });
@@ -707,7 +694,7 @@
       modal({
         title: "Ask " + person(m.owner_id) + " to move", ok: "Send request",
         body: '<p class="small">' + esc(labOf(m.lab_id)) + "'s " + esc(resName(d, m.resource_id)) + " session " + esc(range(m.from.start, m.from.end)) +
-          " would move to <b>" + esc(range(m.to.start, m.to.end)) + "</b> the same day. They decide; LabSync only sends an in-app request.</p>" +
+          " would move to <b>" + esc(range(m.to.start, m.to.end)) + "</b> the same day. It's their call.</p>" +
           '<div class="field" style="margin-top:12px"><label for="ask-msg">Message (optional)</label><textarea id="ask-msg" rows="3">Could you shift your session so we can image this morning?</textarea></div>',
         onOk: function (bg) {
           return api("POST", "/api/proposals/" + prop.proposal_id + "/request-moves", { message: bg.querySelector("#ask-msg").value }).then(function (r) {
@@ -722,7 +709,7 @@
       var id = btn.dataset.id;
       modal({
         title: "Approve final schedule", ok: "Approve",
-        body: '<p>Approving permits the commit <b>only if constraints still validate</b>. Nothing is booked until you press Commit plan.</p>',
+        body: '<p>Once you approve, press <b>Commit plan</b> to book it.</p>',
         onOk: function () {
           return api("POST", "/api/approvals/" + id + "/decide", { decision: "approve" }).then(function (r) {
             if (!r.ok) { toast(errText(r.data), true); return; }
@@ -733,15 +720,15 @@
       });
     });
     on("commit", function () {
-      var writes = prop.creates.map(function (c) { return "<li>Create " + esc(c.entity === "Booking" ? "booking" : "room reservation") + ' <span class="mono">' + esc(c.booking_id) + "</span>: " + esc(resName(d, c.resource_id)) + " " + esc(range(c.start, c.end)) + "</li>"; })
-        .concat(prop.contingent_moves.map(function (m) { return '<li>Move <span class="mono">' + esc(m.booking_id) + "</span> (" + esc(labOf(m.lab_id)) + ") " + esc(range(m.from.start, m.from.end)) + " → " + esc(range(m.to.start, m.to.end)) + "</li>"; }));
+      var writes = prop.creates.map(function (c) { return "<li>Book " + esc(resName(d, c.resource_id)) + " " + esc(range(c.start, c.end)) + "</li>"; })
+        .concat(prop.contingent_moves.map(function (m) { return "<li>Move " + esc(labOf(m.lab_id)) + "'s session " + esc(range(m.from.start, m.from.end)) + " → " + esc(range(m.to.start, m.to.end)) + "</li>"; }));
       modal({
         title: "Commit plan", ok: "Commit",
-        body: "<p>LabSync re-checks the calendar, then writes exactly these changes together (or none of them):</p><ul class=\"small\">" + writes.join("") + "</ul>",
+        body: "<p>This will:</p><ul class=\"small\">" + writes.join("") + "</ul>",
         onOk: function () {
           return api("POST", "/api/proposals/" + prop.proposal_id + "/commit").then(function (r) {
             if (!r.ok) { toast(errText(r.data), true); reload(); return; }
-            toast("Committed. Receipt " + r.data.receipt.receipt_id + ".");
+            toast("Booked. You're all set.");
             S.lastRun = null;
             reload();
           });
@@ -782,7 +769,7 @@
       var d = r.data, tabs = [["waiting", "Waiting on me", d.waiting_on_me], ["requested", "Requested by me", d.requested_by_me], ["history", "History", d.history]];
       var cur = tabs.filter(function (t) { return t[0] === tab; })[0] || tabs[0];
       view.innerHTML = '<div class="plan-head"><div><div class="eyebrow">' + esc(S.session.persona.name) + (S.session.persona.lab_name ? " · " + esc(S.session.persona.lab_name) : "") +
-        '</div><h1>Approvals</h1><p class="muted">Requests that need a person\'s decision. Agents can advise but never decide.</p></div></div>' +
+        '</div><h1>Approvals</h1><p class="muted">Requests that need your decision.</p></div></div>' +
         '<div class="tabs" role="tablist" aria-label="Approval lists">' + tabs.map(function (t) {
           return '<button role="tab" aria-selected="' + (t === cur) + '" data-tab="' + t[0] + '">' + esc(t[1]) + '<span class="tab-n">' + t[2].length + "</span></button>";
         }).join("") + '</div><div role="tabpanel" style="max-width:860px">' +
@@ -817,12 +804,12 @@
         (im.your_other_bookings_that_day.length ? "<li class=\"muted\">Your lab's other sessions that day: " + esc(im.your_other_bookings_that_day.map(function (b) { return ((S.session.resource_names || {})[b.resource_id] || b.resource_id) + " " + range(b.start, b.end) + " (" + person(b.user_id) + ")"; }).join("; ")) + "</li>" : "") + "</ul>";
       if (c.recommendation && tab === "waiting") {
         var rec = c.recommendation;
-        body += '<div class="advice"><div class="row between"><b>' + ic("spark", 14) + " Conflict Negotiator advice: " + esc(rec.recommendation.replace(/_/g, " ")) + '</b><span class="small muted">You decide</span></div><ul>' +
+        body += '<div class="advice"><div class="row between"><b>' + ic("spark", 14) + " Suggestion: " + esc(rec.recommendation.replace(/_/g, " ")) + '</b><span class="small muted">You decide</span></div><ul>' +
           rec.reasons.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>" +
           (rec.alternatives && rec.alternatives.length ? '<p class="small">Alternatives: ' + esc(rec.alternatives.map(function (a) { return range(a.start, a.end); }).join(", ")) + "</p>" : "") + "</div>";
       }
     } else if (c.slot_kind === "requester_confirm") {
-      body += '<ul class="small" style="margin:0;padding-left:18px">' + (c.held || []).map(function (h) { return "<li>" + esc(h.resource_id) + " " + esc(fmtDay(h.start)) + " " + esc(range(h.start, h.end)) + " (held)</li>"; }).join("") + "</ul>" +
+      body += '<ul class="small" style="margin:0;padding-left:18px">' + (c.held || []).map(function (h) { return "<li>" + esc((S.session.resource_names || {})[h.resource_id] || h.resource_id) + " " + esc(fmtDay(h.start)) + " " + esc(range(h.start, h.end)) + " (held)</li>"; }).join("") + "</ul>" +
         '<p class="small"><a href="#/plans/' + esc(c.plan_id) + '">Open the plan</a></p>';
     } else if (c.order) {
       var o = c.order;
@@ -857,9 +844,8 @@
     if (kind === "approve") {
       modal({
         title: "Approve request", ok: "Approve",
-        body: "<p>Approving permits the proposed " + (slot === "owner_move" ? "move" : "action") + " <b>only if constraints still validate</b>." +
-          (slot === "owner_move" ? " Your booking moves only when the requester commits." : "") + "</p>",
-        onOk: function () { return send({ decision: "approve" }, "Approved. Both activity logs show your decision."); }
+        body: "<p>" + (slot === "owner_move" ? "Your booking moves only once the requester commits their plan." : "You're agreeing to this request. Nothing is bought or moved automatically.") + "</p>",
+        onOk: function () { return send({ decision: "approve" }, "Approved."); }
       });
     } else if (kind === "reject") {
       modal({
@@ -885,7 +871,7 @@
   // ------------------------------------------------------------------ Screen 5: department
   function deptDenied(r) {
     view.innerHTML = '<div class="panel panel-b empty"><b>Department Intelligence is for department admins.</b>' +
-      (r.data.code === "PERMISSION_DENIED" ? "Switch the simulated identity to Department admin to view it. " : esc(errText(r.data)) + " ") +
+      (r.data.code === "PERMISSION_DENIED" ? "Switch to Department admin in the sidebar to see it. " : esc(errText(r.data)) + " ") +
       '<a href="#/">Back to your workspace</a></div>';
   }
 
@@ -898,24 +884,24 @@
       var util = {}; snap.utilization.forEach(function (u) { util[u.resource_id] = u; });
       var pool = values(d.insights).filter(function (i) { return i.kind === "pooled_order"; })[0];
       var over = values(d.insights).filter(function (i) { return i.kind === "overload_rebalance"; })[0];
-      var html = '<div class="plan-head"><div><div class="eyebrow">' + esc(S.session.department) + " · " + esc(S.session.building) + " · Synthetic scenario · week of " + esc(fmtDay(d.week)) + "</div>" +
-        "<h1>Department Intelligence</h1><p class=\"muted\">" + (rv ? "Last computed " + esc(fmtStamp(rv.finished_at)) + " by the Department Optimizer (" + esc(rv.mode === "live" ? "Claude" : "offline mock") + ")" : "Not computed yet. Run a review to have the Department Optimizer write insight cards.") + "</p></div>" +
+      var html = '<div class="plan-head"><div><div class="eyebrow">' + esc(S.session.department) + " · week of " + esc(fmtDay(d.week)) + "</div>" +
+        "<h1>Department Intelligence</h1><p class=\"muted\">" + (rv ? "Last updated " + esc(fmtStamp(rv.finished_at)) : "Press Run department review to see where labs can save money and time.") + "</p></div>" +
         '<div class="row"><button class="btn primary" data-act="review">' + ic("spark", 16) + (rv ? "Recompute" : "Run department review") + "</button></div></div>";
       html += '<div class="stats">' +
         stat("Potential purchasing savings", pool ? usd(pool.estimate.potential_savings_usd) : "$0", pool ? "Estimated, not realized · " + pool.lab_ids.length + " labs must agree" : "No shared order detected") +
         stat("Confocal-1 utilization", util.confocal_1 ? pct(util.confocal_1.utilization) : "—", util.confocal_1 ? util.confocal_1.booked_hours + " of " + util.confocal_1.available_hours + " staffed hours booked" : "") +
-        stat("Open cross-lab recommendations", rv ? String(cards.length) : "—", rv ? "Written from tool results; each needs approval" : "Run a review") + "</div>";
+        stat("Open cross-lab recommendations", rv ? String(cards.length) : "—", rv ? "Each needs approval" : "Run a review") + "</div>";
       html += '<div class="hero-row"><section class="panel" aria-labelledby="h-cap"><div class="panel-h"><h2 id="h-cap">Capacity imbalance</h2><span class="small muted">Booked hours, week of ' + esc(fmtDay(d.week)) + '</span></div><div class="panel-b chart">' +
         (over ? capacityChart(over.estimate) : '<p class="muted">No overload detected this week.</p>') + "</div></section>" +
         '<section class="panel" aria-labelledby="h-top"><div class="panel-h"><h2 id="h-top">Top opportunity</h2>' + (pool ? stateBadge(pool.state) : "") + '</div><div class="panel-b">' +
         (pool ? '<p class="metric" style="font-size:30px;font-weight:650">' + usd(pool.estimate.potential_savings_usd) + ' <span class="small muted" style="font-weight:400">potential</span></p>' +
           '<p class="small">= ' + usd(pool.estimate.volume_component_usd) + " volume + " + usd(pool.estimate.shipping_component_usd) + " shipping by combining " +
-          esc(pool.lab_ids.map(labOf).join(" and ")) + " orders for " + esc(pool.detail.sku_id) + ".</p>" +
+          esc(pool.lab_ids.map(labOf).join(" and ")) + " orders for " + esc(skuName(pool.detail.sku_id)) + ".</p>" +
           '<p class="small muted" style="margin-top:6px">Needs: ' + esc(pool.required_approvals.map(person).join(", ")) + "</p>" +
           '<a class="btn" style="margin-top:12px" href="#/intelligence/insights/' + esc(pool.insight_id) + '">Review recommendation' + ic("arrow", 14) + "</a>" : '<p class="muted">No shared purchase detected.</p>') + "</div></section></div>";
       html += '<h2 style="margin:8px 0 12px">Insights</h2>';
       if (!rv) {
-        html += '<div class="panel empty" style="margin-bottom:16px"><b>No review yet.</b>Run the department review to get exactly three evidence-backed cards.</div>';
+        html += '<div class="panel empty" style="margin-bottom:16px"><b>No review yet.</b>Press Run department review above.</div>';
       } else if (!rv.output) {
         html += '<div class="banner err">' + ic("alert") + "<div>The last review produced no accepted cards: " + esc((rv.errors || []).join("; ") || rv.text) + "</div></div>";
       } else {
@@ -927,8 +913,6 @@
       html += '<section class="panel" aria-labelledby="h-dem"><div class="panel-h"><h2 id="h-dem">Demand and capacity</h2><span class="badge forecast">Forecast</span></div><div class="panel-b"><div class="charts2">' +
         ["confocal_1", "confocal_2"].map(function (rid) { return '<div class="chart"><h3 style="margin-bottom:6px">' + esc(d.names[rid]) + "</h3>" + demandChart(d.history[rid] || [], d.forecasts[rid], util[rid]) + "</div>"; }).join("") +
         "</div>" + forecastMeta(d.forecasts) + '<details class="how" style="margin-top:12px"><summary>Table view and all instruments</summary>' + utilTable(snap, d.names) + "</details></div></section>";
-      html += '<p class="small muted" style="margin-top:16px">All bookings, prices and forecasts are synthetic demo data. Snapshot <span class="mono">' + esc(snap.snapshot_id) + "</span> · " + snap.source_record_ids.length + " source records · " +
-        (rv ? 'agent run <span class="mono">' + esc(rv.run_id) + "</span> (" + esc(rv.tool_calls.join(", ")) + ")" : "no agent run yet") + "</p>";
       view.innerHTML = html;
       on("review", function (btn) {
         busy(btn, true, "Reviewing…");
@@ -953,7 +937,7 @@
     return '<article class="panel ins" aria-labelledby="ins-' + esc(c.insightId) + '"><div class="row between"><span class="kind-ic ' + esc(c.kind) + '">' + ic(KIND_ICON[c.kind] || "info") + "</span>" +
       stateBadge(ins ? ins.state : "detected") + '</div><h3 id="ins-' + esc(c.insightId) + '">' + esc(named(c.headline)) + '</h3><p class="small">' + esc(named(c.evidenceSentence)) + "</p>" +
       '<div class="value">' + esc(unit) + ' <small>' + esc(c.impact.label.replace(/^\$?[\d.]+\s*(%|hours?)?\s*(of\s+)?/i, "")) + "</small></div>" +
-      '<p class="small muted">Confidence ' + esc(c.confidence) + " · " + esc(c.assumptions[0] || "") + (c.advisory ? " · advisory" : "") + "</p>" + approvals +
+      '<p class="small muted">Confidence: ' + esc(c.confidence) + "</p>" + approvals +
       '<div class="foot"><a class="btn sm" href="#/intelligence/insights/' + esc(c.insightId) + '">Review recommendation' + ic("arrow", 14) + "</a></div></article>";
   }
   function capacityChart(est) {
@@ -1002,9 +986,9 @@
   function forecastMeta(fcs) {
     var f = fcs.confocal_1 || fcs.confocal_2;
     if (!f) return '<p class="small muted">No forecast run yet. Running the department review also computes the confocal forecasts.</p>';
-    return '<p class="small" style="margin-top:8px">Forecast method: <b>weighted baseline v1</b> (' + esc(f.model_kind.replace(/_/g, " ")) + ") · " +
-      Object.keys(fcs).map(function (k) { return esc(k) + ": " + fcs[k].predicted_hours + " h predicted, backtest MAE " + (Math.round(fcs[k].mae * 100) / 100) + " h"; }).join(" · ") +
-      " · run " + esc(fmtStamp(f.generated_at)) + '<br><span class="muted">' + esc(f.interval_label) + ". Six weeks of synthetic history.</span></p>";
+    return '<p class="small" style="margin-top:8px">Forecast for next week: ' +
+      Object.keys(fcs).map(function (k) { return esc(named(k)) + " about " + fcs[k].predicted_hours + " h"; }).join(", ") +
+      '. <span class="muted">Based on the last six weeks.</span></p>';
   }
   function utilTable(snap, names) {
     return '<table style="margin-top:10px"><thead><tr><th>Instrument</th><th class="n">Booked h</th><th class="n">Staffed h</th><th class="n">Utilization</th><th>Level</th></tr></thead><tbody>' +
@@ -1034,22 +1018,21 @@
           '<div class="box after"><div class="eyebrow">Pooled order</div><div class="big">' + usd(est.pooled_total_usd) + '</div><ul class="small"><li>' + est.total_quantity + " × " + usd(est.pooled_unit_price_usd) +
           " (volume tier) + " + usd(ship) + " shipping once</li></ul></div></div>" +
           '<p style="margin-top:12px"><b>Potential ' + usd(est.potential_savings_usd) + "</b> = " + usd(est.volume_component_usd) + " volume + " + usd(est.shipping_component_usd) + " shipping. Not realized until both labs and the department agree and someone actually orders.</p>" +
-          '<h3 style="margin-top:16px">Affected orders</h3><ul class="small">' + ins.candidate_ids.map(function (o) { return '<li class="mono">' + esc(o) + " · " + esc(sku) + "</li>"; }).join("") + "</ul>" +
-          (d.exclusions.length ? '<h3 style="margin-top:12px">Not pooled</h3><ul class="small">' + d.exclusions.map(function (x) { return "<li>" + esc((x.order_ids || x.ids || []).join(", ")) + ": " + esc(x.reason) + "</li>"; }).join("") + "</ul>" : "");
+          (d.exclusions.length ? '<h3 style="margin-top:12px">Not included</h3><ul class="small">' + d.exclusions.map(function (x) { return "<li>" + esc(x.reason) + "</li>"; }).join("") + "</ul>" : "");
       } else if (ins.kind === "overload_rebalance") {
         value = "Potential relief: " + est.movable_hours + " hours";
         left = '<div class="math"><div class="box"><div class="eyebrow">Now</div><div class="big">' + est.before.source_hours + " h / " + est.before.target_hours + ' h</div><p class="small">' + esc(named(est.source)) + " " + pct(est.before.source_utilization) + " · " + esc(named(est.target)) + " " + pct(est.before.target_utilization) + "</p></div>" +
           '<div class="box after"><div class="eyebrow">After the moves</div><div class="big">' + est.after.source_hours + " h / " + est.after.target_hours + ' h</div><p class="small">' + esc(named(est.source)) + " " + pct(est.after.source_utilization) + " · " + esc(named(est.target)) + " " + pct(est.after.target_utilization) + "</p></div></div>" +
           '<p class="small muted" style="margin-top:8px">Total workload stays ' + est.total_hours_after + " h; only the instrument changes.</p>" +
-          '<h3 style="margin-top:16px">Proposed moves (owners must agree)</h3><table><thead><tr><th>Booking</th><th>Owner</th><th>When</th><th class="n">Hours</th></tr></thead><tbody>' +
-          est.moves.map(function (m) { return '<tr><td class="mono">' + esc(m.booking_id) + "</td><td>" + esc(person(m.owner_id)) + " · " + esc(labOf(m.lab_id)) + "</td><td>" + esc(fmtDay(m.start) + " " + range(m.start, m.end)) + '</td><td class="n">' + m.hours + "</td></tr>"; }).join("") + "</tbody></table>" +
-          (est.excluded.length ? '<p class="small" style="margin-top:8px">Excluded: ' + esc(est.excluded.map(function (x) { return x.booking_id + " (" + x.reason + ")"; }).join(", ")) + "</p>" : "");
+          '<h3 style="margin-top:16px">Proposed moves (owners must agree)</h3><table><thead><tr><th>Owner</th><th>When</th><th class="n">Hours</th></tr></thead><tbody>' +
+          est.moves.map(function (m) { return "<tr><td>" + esc(person(m.owner_id)) + " · " + esc(labOf(m.lab_id)) + "</td><td>" + esc(fmtDay(m.start) + " " + range(m.start, m.end)) + '</td><td class="n">' + m.hours + "</td></tr>"; }).join("") + "</tbody></table>" +
+          (est.excluded.length ? '<p class="small" style="margin-top:8px">Not moved: ' + esc(est.excluded.map(function (x) { return x.reason; }).join("; ")) + "</p>" : "");
       } else {
-        value = esc(est.resource_id) + " used " + pct(est.utilization);
+        value = esc(named(est.resource_id)) + " used " + pct(est.utilization);
         left = '<p><b>' + est.booked_hours + " of " + est.available_hours + " staffed hours</b> booked next week; " + est.low_weeks + " of " + est.weeks_observed + " observed weeks were low.</p>" +
           '<table style="margin-top:10px"><thead><tr><th>Week</th><th class="n">Booked h</th><th class="n">Utilization</th></tr></thead><tbody>' +
           est.history.map(function (h) { return "<tr><td>" + esc(fmtDay(h.week_start)) + '</td><td class="n">' + h.booked_hours + '</td><td class="n">' + pct(h.utilization) + "</td></tr>"; }).join("") + "</tbody></table>" +
-          '<p class="small" style="margin-top:10px">Overflow: ' + esc(est.overflow_sources.map(function (o) { return o.resource_id + " at " + pct(o.utilization) + " with about " + o.avg_unmet_hours_per_week + " unmet h/week"; }).join("; ")) + "</p>" +
+          '<p class="small" style="margin-top:10px">Overflow: ' + esc(est.overflow_sources.map(function (o) { return named(o.resource_id) + " at " + pct(o.utilization) + " with about " + o.avg_unmet_hours_per_week + " unmet h/week"; }).join("; ")) + "</p>" +
           '<ul class="small">' + est.suggested_next_steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul><p class=\"why\">" + esc(est.caveat) + "</p>";
       }
       var proposed = ins.state !== "detected";
@@ -1063,14 +1046,12 @@
           var a = (ins.approvals || []).filter(function (x) { return x.approver_id === p; })[0];
           return '<li class="row between"><span>' + esc(person(p)) + "</span>" + (a ? stateBadge(a.status === "decided" ? (a.decision === "approve" ? "approved" : "rejected") : "pending") : '<span class="badge">Not asked</span>') + "</li>";
         }).join("") + "</ul></div>" +
-        '<p><b>Evidence:</b> <span class="mono">' + esc((card ? card.evidenceIds : ins.candidate_ids).join(", ")) + "</span></p>" +
         '<div><button class="btn primary" data-act="propose"' + (proposed ? " disabled" : "") + ">" + esc(cta) + "</button>" +
         '<p class="why">' + (proposed ? "Already proposed. Waiting for the approvers above." : "Creates approval requests for the people above. No order, booking or payment happens.") + "</p></div></div></section>";
-      view.innerHTML = '<div class="plan-head"><div><div class="eyebrow">Decision case · ' + esc(ins.kind.replace(/_/g, " ")) + "</div><h1>" + esc(card ? named(card.headline) : id) + "</h1>" +
+      view.innerHTML = '<div class="plan-head"><div><div class="eyebrow">Recommendation</div><h1>' + esc(card ? named(card.headline) : id) + "</h1>" +
         '<p class="muted">' + value + " · " + stateBadge(ins.state) + '</p></div><a class="btn" href="#/intelligence">Back to insights</a></div>' +
         '<div class="case"><section class="panel"><div class="panel-b">' + left +
-        '<details class="how" style="margin-top:16px"><summary>How calculated</summary><pre>' + esc((est.formula ? est.formula + "\n\n" : "") + JSON.stringify(est, null, 2)) + "</pre>" +
-        '<p class="small muted">Snapshot ' + esc(ins.input_snapshot_id) + " · data as of " + esc(fmtStamp(d.snapshot.data_timestamp)) + " · synthetic data</p></details></div></section>" + right + "</div>";
+        '<details class="how" style="margin-top:16px"><summary>How calculated</summary><pre>' + esc((est.formula ? est.formula + "\n\n" : "") + JSON.stringify(est, null, 2)) + "</pre></details></div></section>" + right + "</div>";
       on("propose", function (btn) {
         modal({
           title: cta, ok: "Propose",
@@ -1094,21 +1075,20 @@
     api("GET", "/api/activity?request_id=" + encodeURIComponent(requestId)).then(function (r) {
       if (!r.ok) { view.innerHTML = '<div class="banner err">' + ic("alert") + esc(errText(r.data)) + "</div>"; return; }
       var d = r.data;
-      view.innerHTML = '<div class="plan-head"><div><div class="eyebrow">Activity · request ' + esc(requestId) + "</div><h1>Audit trail</h1>" +
-        '<p class="muted">Every change has an actor, time and before/after. Agent reasoning is not shown; the tool log is.</p></div>' +
-        '<label class="toggle"><input type="checkbox" id="tech"' + (S.techView ? " checked" : "") + "> Tool execution</label></div>" +
+      view.innerHTML = '<div class="plan-head"><div><h1>History</h1>' +
+        '<p class="muted">Who did what, and when.</p></div>' +
+        '<label class="toggle"><input type="checkbox" id="tech"' + (S.techView ? " checked" : "") + "> Show details</label></div>" +
         '<div class="case"><section class="panel"><div class="panel-b">' + (d.events.length ? '<ol class="timeline">' + d.events.map(function (e) {
           var bad = e.status !== "ok";
-          return '<li><span class="dotc' + (bad ? " bad" : "") + '" aria-hidden="true">' + ic(bad ? "x" : "check", 12) + "</span><div><b>" + esc(e.label) + '</b><div class="small muted">' + esc(e.actor_name) + " · " + esc(fmtStamp(e.created_at)) +
-            ' · <span class="mono">' + esc(e.entity_id || "") + "</span></div>" +
-            (S.techView ? '<div class="small mono muted" style="margin-top:4px">' + esc(e.operation) + (e.before ? " · before " + JSON.stringify(e.before).slice(0, 160) : "") + (e.after ? " · after " + JSON.stringify(e.after).slice(0, 200) : "") + "</div>" : "") + "</div></li>";
+          return '<li><span class="dotc' + (bad ? " bad" : "") + '" aria-hidden="true">' + ic(bad ? "x" : "check", 12) + "</span><div><b>" + esc(e.label) + '</b><div class="small muted">' + esc(e.actor_name) + " · " + esc(fmtStamp(e.created_at)) + "</div>" +
+            (S.techView ? '<div class="small mono muted" style="margin-top:4px">' + esc((e.entity_id || "") + " · " + e.operation) + (e.before ? " · before " + JSON.stringify(e.before).slice(0, 160) : "") + (e.after ? " · after " + JSON.stringify(e.after).slice(0, 200) : "") + "</div>" : "") + "</div></li>";
         }).join("") + "</ol>" : '<div class="empty"><b>No activity you can see for this request.</b></div>') + "</div></section>" +
-        '<section class="panel"><div class="panel-h"><h2>Agent runs</h2></div><div class="panel-b">' + (d.runs.length ? d.runs.map(function (run) {
+        '<section class="panel"><div class="panel-h"><h2>Assistant steps</h2></div><div class="panel-b">' + (d.runs.length ? d.runs.map(function (run) {
           return '<div class="tool"><div class="row between"><b>' + esc(run.agent.replace(/_/g, " ")) + "</b>" + stateBadge(run.status === "completed" ? "ok" : run.status) + '</div><div class="small muted">' +
-            esc((run.mode === "live" ? "Claude " + (run.model || "") : "offline mock") + " · " + fmtStamp(run.started_at) + " · run " + run.run_id) + "</div>" +
+            esc(fmtStamp(run.started_at)) + "</div>" +
             (S.techView ? '<ol class="small mono" style="padding-left:18px;margin:8px 0 0">' + run.tool_calls.map(function (c) { return "<li>" + esc(c.name) + " → " + esc(JSON.stringify(c.result)) + "</li>"; }).join("") + "</ol>" :
-              '<p class="small">' + esc(run.tool_calls.map(function (c) { return c.name; }).join(" → ")) + "</p>") + "</div>";
-        }).join("") : '<p class="muted small">No agent runs you can see for this request.</p>') + "</div></section></div>";
+              "") + "</div>";
+        }).join("") : '<p class="muted small">Nothing to show.</p>') + "</div></section></div>";
       document.getElementById("tech").addEventListener("change", function (e) { S.techView = e.target.checked; viewActivity(requestId); });
     });
   }
@@ -1118,17 +1098,17 @@
     var token = "";
     try { token = sessionStorage.getItem("labsync.token") || ""; } catch (e) { /* ignore */ }
     modal({
-      title: "Demo controls", ok: "Reset demo data", danger: true,
-      body: '<p class="small">Developer-only. Restores the synthetic <b>Imaging Tuesday</b> seed: bookings, orders, approvals and agent runs. It never touches real data and sends nothing.</p>' +
-        '<div class="field" style="margin-top:12px"><label for="tok">Reset token (printed when the server starts)</label><input id="tok" type="password" autocomplete="off" value="' + esc(token) + '"></div>' +
-        '<p style="margin-top:14px"><button type="button" class="btn sm" id="seed">Seed scenario: Imaging Tuesday</button> <span class="small muted">Fills in the sample request; doesn\'t submit it.</span></p>',
+      title: "Reset data", ok: "Reset", danger: true,
+      body: '<p class="small">Puts every booking, order and approval back to the starting example, so you can run through it again.</p>' +
+        '<div class="field" style="margin-top:12px"><label for="tok">Reset code (shown in the terminal when the app starts)</label><input id="tok" type="password" autocomplete="off" value="' + esc(token) + '"></div>' +
+        '<p style="margin-top:14px"><button type="button" class="btn sm" id="seed">Fill in the sample request</button></p>',
       onOk: function (bg) {
         var t = bg.querySelector("#tok").value;
         try { sessionStorage.setItem("labsync.token", t); } catch (e) { /* ignore */ }
         return api("POST", "/api/reset", { token: t }).then(function (r) {
-          if (!r.ok) { toast(r.data.code === "RESET_NOT_ALLOWED" ? "Wrong reset token." : errText(r.data), true); return true; }
+          if (!r.ok) { toast(r.data.code === "RESET_NOT_ALLOWED" ? "Wrong reset code." : errText(r.data), true); return true; }
           S.selected = {}; S.lastRun = null;
-          toast("Demo data reset to the Imaging Tuesday seed.");
+          toast("Data reset.");
           location.hash = "#/";
           refreshAll();
         });
@@ -1148,7 +1128,7 @@
     S.persona = e.target.value;
     save("persona", S.persona);
     loadSession().then(function () {
-      announce("Now acting as " + S.session.persona.name + " (simulated identity)");
+      announce("Signed in as " + S.session.persona.name);
       var part = location.hash.split("/")[1];
       if (part === "plans" || part === "workspace" || part === "intelligence") {
         if (!S.session.persona.lab_id && part !== "intelligence") { location.hash = "#/"; return route(); }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LabSync · Local demo</title>
+  <title>LabSync</title>
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
@@ -16,11 +16,10 @@
       <nav class="nav" id="nav" aria-label="Sections"></nav>
       <div class="sidebar-foot">
         <div class="persona">
-          <label for="persona">Simulated identity</label>
-          <select id="persona" aria-describedby="persona-hint"></select>
-          <p class="hint" id="persona-hint">Demo persona switcher. Permissions are still checked on the server.</p>
+          <label for="persona">Signed in as</label>
+          <select id="persona"></select>
         </div>
-        <button class="btn sm ghost" id="demo-controls" type="button" aria-label="Demo controls"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Demo controls</span></button>
+        <button class="btn sm ghost" id="demo-controls" type="button" aria-label="Reset data"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Reset data</span></button>
       </div>
     </aside>
     <div class="main">
@@ -28,9 +27,6 @@
         <div class="crumbs" id="crumbs"></div>
         <div class="spacer"></div>
         <span class="chip" id="chip-date"></span>
-        <span class="chip" id="chip-synthetic"><span class="dot"></span>Synthetic campus data</span>
-        <span class="chip warn" id="chip-c3" role="status"><span class="dot"></span>Local demo · C3 not connected</span>
-        <span class="chip" id="chip-agents"></span>
       </header>
       <main class="content" id="view" tabindex="-1"></main>
     </div>

@@ -33,8 +33,6 @@ async function confirmModal(page, label) {
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     await page.getByRole("heading", { name: "What are you trying to run?" }).waitFor();
-    await page.getByText("Local demo · C3 not connected").waitFor();
-    await page.getByText("Synthetic campus data").waitFor();
     if (!(await page.getByRole("button", { name: "Generate plan" }).isDisabled())) throw new Error("Generate should start disabled");
     await page.getByText("No experiment yet").waitFor();
     log("home composer, badges and empty state");
@@ -45,7 +43,7 @@ async function confirmModal(page, label) {
     await page.locator("#goal").focus();
     await page.keyboard.press("Control+Enter");
     await page.waitForURL(/#\/plans\//);
-    await page.getByText("Lab Agent built this draft.").waitFor();
+    await page.getByText("Here's your plan.").waitFor();
     await page.getByText("Needs owner approval").waitFor();
     await page.getByText("requires certification").first().waitFor();
     log("Lab Agent plan with two options and the blocked Confocal-2");
@@ -68,10 +66,10 @@ async function confirmModal(page, label) {
     await persona(page, "chen_owner");
     await page.goto(BASE + "/#/approvals");
     await page.getByRole("heading", { name: /requests moving your Confocal Microscope 1 slot/ }).waitFor();
-    await page.getByText("Conflict Negotiator advice: approve").waitFor();
+    await page.getByText("Suggestion: approve").waitFor();
     await shot(page, "3-chen-approval");
     await page.getByRole("button", { name: "Approve", exact: true }).click();
-    await page.getByRole("dialog").getByText("only if constraints still validate").waitFor();
+    await page.getByRole("dialog").getByText("Your booking moves only once the requester commits their plan.").waitFor();
     await confirmModal(page, "Approve");
     await page.getByText("Nothing is waiting on you.").waitFor();
     log("Chen approves the move in the inbox");
@@ -84,18 +82,18 @@ async function confirmModal(page, label) {
     const commit = page.getByRole("button", { name: "Commit plan" });
     await page.waitForFunction(() => { const b = [...document.querySelectorAll("button")].find((x) => x.textContent.trim() === "Commit plan"); return b && !b.disabled; });
     await commit.click();
-    await page.getByRole("dialog").getByText("bk_chen_confocal").waitFor();
+    await page.getByRole("dialog").getByText("Move Chen Imaging's session", { exact: false }).waitFor();
     await confirmModal(page, "Commit");
-    await page.getByText("Plan committed.").waitFor();
+    await page.getByText("Booked.", { exact: true }).waitFor();
     await page.locator(".blk.mine", { hasText: "10:00–13:00" }).waitFor();
     log("Morgan confirms and commits; receipt and booking on the timeline");
     await shot(page, "4-receipt");
 
     await page.getByRole("button", { name: "Draft supply requests" }).click();
-    await page.getByText("Proposed · awaiting lab approval").first().waitFor();
+    await page.getByText("Waiting for lab approval").first().waitFor();
     log("supply requests drafted, not ordered");
 
-    await page.getByRole("link", { name: "View audit trail" }).first().click();
+    await page.getByRole("link", { name: "View history" }).first().click();
     await page.getByText("Bookings committed").waitFor();
     log("audit trail shows the commit");
 
@@ -133,9 +131,9 @@ async function confirmModal(page, label) {
     await shot(page, "7-mobile");
     await page.setViewportSize({ width: 1440, height: 900 });
 
-    await page.getByRole("button", { name: "Demo controls" }).click();
+    await page.getByRole("button", { name: "Reset data" }).click();
     await page.locator("#tok").fill(TOKEN);
-    await confirmModal(page, "Reset demo data");
+    await confirmModal(page, "Reset");
     await page.getByText("No experiment yet").waitFor();
     log("reset restores the seed");
 

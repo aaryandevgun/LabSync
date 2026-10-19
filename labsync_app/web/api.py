@@ -128,9 +128,11 @@ class WebAPI:
         return {"status": "ok", "persona": me, "personas": people, "is_admin": me["role"] in T.ADMIN_ROLES,
                 "mode": getattr(self.o.client, "name", self.mode), "model": getattr(self.o.client, "model", None),
                 "c3_connected": False, "synthetic": True, "now": self.repo.now(), "demo_week": DEMO_WEEK,
-                "department": dept["name"], "building": dept["building_name"], "waiting_count": len(waiting),
+                "department": dept["name"].replace(" (synthetic)", ""), "building": dept["building_name"], "waiting_count": len(waiting),
                 "resource_names": {r.get("instrument_id") or r["room_id"]: r["name"]
-                                   for r in self.repo.list_records("Instrument") + self.repo.list_records("Room")}}
+                                   for r in self.repo.list_records("Instrument") + self.repo.list_records("Room")},
+                "sku_names": {k["sku_id"]: k["name"] for k in self.repo.list_records("SupplySku")},
+                "vendor_names": {v["vendor_id"]: v["name"].replace(" (synthetic)", "") for v in self.repo.list_records("Vendor")}}
 
     def _plan_summary(self, plan):
         proposals = [p for p in self.repo.list_records("ReservationProposal") if p["plan_id"] == plan["plan_id"]]
