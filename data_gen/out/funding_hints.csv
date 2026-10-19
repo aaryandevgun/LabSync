@@ -1,0 +1,2 @@
+funding_hint_id,lab_id,category,milestone_date,restricted_flag,note,provenance
+fh_rivera_award_end,lab_rivera,end_of_award,2026-12-15,true,Synthetic planning signal only; not a real grant record,synthetic:imaging_tuesday_v1

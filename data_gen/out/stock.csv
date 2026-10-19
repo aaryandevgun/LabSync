@@ -1,0 +1,11 @@
+stock_id,lab_id,sku_id,quantity,expiry_date,ownership_source,provenance
+stk_moreno_antigfp,lab_moreno,ANTI_GFP_100,0,,lab_purchase,synthetic:imaging_tuesday_v1
+stk_moreno_coverslip,lab_moreno,COVERSLIP_24,0,,lab_purchase,synthetic:imaging_tuesday_v1
+stk_moreno_pbs,lab_moreno,PBS_1L,4,2027-06-30,lab_purchase,synthetic:imaging_tuesday_v1
+stk_patel_antigfp,lab_patel,ANTI_GFP_100,0,,lab_purchase,synthetic:imaging_tuesday_v1
+stk_patel_tips,lab_patel,TIPS_200,6,,lab_purchase,synthetic:imaging_tuesday_v1
+stk_chen_coverslip,lab_chen,COVERSLIP_24,3,,lab_purchase,synthetic:imaging_tuesday_v1
+stk_chen_dapi,lab_chen,DAPI_1ML,1,2027-01-31,grant_purchase,synthetic:imaging_tuesday_v1
+stk_rivera_pbs,lab_rivera,PBS_1L,8,2027-03-31,lab_purchase,synthetic:imaging_tuesday_v1
+stk_rivera_tubes,lab_rivera,TUBES_15,2,,lab_purchase,synthetic:imaging_tuesday_v1
+stk_rivera_plates,lab_rivera,PCR_PLATES,1,,lab_purchase,synthetic:imaging_tuesday_v1

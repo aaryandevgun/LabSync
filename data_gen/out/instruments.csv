@@ -1,0 +1,11 @@
+instrument_id,name,kind,capabilities,required_qualifications,buffer_minutes,location,staffed_hours_per_week,open_local,close_local,status
+confocal_1,Confocal Microscope 1,confocal_microscope,gfp_imaging;confocal_imaging,confocal_cert,15,north_bio_building,40,09:00,17:00,active
+confocal_2,Confocal Microscope 2,confocal_microscope,gfp_imaging;confocal_imaging,confocal_2_cert,15,north_bio_building,40,09:00,17:00,active
+flow_1,Flow Cytometer 1,flow_cytometer,flow_analysis,flow_cert,20,north_bio_building,40,09:00,17:00,active
+flow_2,Flow Cytometer 2,flow_cytometer,flow_analysis,flow_cert,20,north_bio_building,40,09:00,17:00,active
+pcr_1,Thermal Cycler 1,thermal_cycler,pcr,pcr_basic,0,north_bio_building,40,09:00,17:00,active
+pcr_2,Thermal Cycler 2,thermal_cycler,pcr,pcr_basic,0,north_bio_building,40,09:00,17:00,active
+centrifuge_1,High-speed Centrifuge,centrifuge,high_g_centrifugation,,10,north_bio_building,40,09:00,17:00,active
+plate_reader_1,Plate Reader,plate_reader,fluorescence_plate_read,,0,north_bio_building,40,09:00,17:00,active
+sequencer_1,Benchtop Sequencer,sequencer,sequencing,sequencer_cert,15,north_bio_building,40,09:00,17:00,active
+microscope_wide_1,Widefield Fluorescence Microscope,widefield_microscope,gfp_imaging;widefield_imaging,,10,north_bio_building,40,09:00,17:00,active

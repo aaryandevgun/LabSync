@@ -1,0 +1,12 @@
+policy_id,key,value,unit,source,provenance
+pol_score_preferred_window,score.weight.meets_preferred_window,50,points,docs/09 A soft objectives,synthetic:imaging_tuesday_v1
+pol_score_hours_late,score.weight.hours_late,-2,points_per_hour,docs/09 A,synthetic:imaging_tuesday_v1
+pol_score_room_switch,score.weight.room_switch_count,-3,points_per_switch,docs/09 A,synthetic:imaging_tuesday_v1
+pol_score_owner_move,score.weight.requires_owner_move,-4,points,docs/09 A,synthetic:imaging_tuesday_v1
+pol_score_extra_cost,score.weight.extra_internal_cost_units,-1,points_per_unit,docs/09 A,synthetic:imaging_tuesday_v1
+pol_slot_step,scheduling.slot_step_minutes,15,minutes,docs/09 A implementation,synthetic:imaging_tuesday_v1
+pol_max_options,scheduling.max_options,3,count,docs/09 A implementation,synthetic:imaging_tuesday_v1
+pol_pool_window,pooling.window_days,7,days,docs/02 M2.1,synthetic:imaging_tuesday_v1
+pol_underuse_threshold,underuse.utilization_threshold,0.25,ratio,docs/09 E,synthetic:imaging_tuesday_v1
+pol_underuse_weeks,underuse.min_low_weeks_of_6,4,weeks,docs/09 E,synthetic:imaging_tuesday_v1
+pol_ewma_alpha,forecast.ewma_alpha,0.35,ratio,docs/09 F,synthetic:imaging_tuesday_v1

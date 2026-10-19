@@ -1,0 +1,9 @@
+sku_id,name,vendor_id,unit,base_price_usd,tier_min_qty,tier_price_usd,shipping_per_order_usd,lead_business_days,storage,handling_requirements
+ANTI_GFP_100,Anti-GFP antibody pack,vendor_bioreagent,pack,120,5,105,20,2,frozen_-20C,cold_chain
+COVERSLIP_24,Coverslip box,vendor_glassco,box,18,,,12,2,ambient,
+PBS_1L,PBS buffer 1L,vendor_labbasics,bottle,14,,,15,3,ambient,
+TIPS_200,Pipette tips 200uL,vendor_labbasics,rack_pack,42,10,38,15,3,ambient,
+TUBES_15,15ml tubes,vendor_labbasics,case,55,6,50,15,3,ambient,
+DAPI_1ML,DAPI stain 1ml,vendor_bioreagent,vial,85,3,78,20,2,refrigerated_4C,light_sensitive;hazard_review
+DNA_KIT,DNA isolation kit,vendor_bioreagent,kit,310,,,20,4,ambient,
+PCR_PLATES,PCR plate box,vendor_labbasics,box,64,,,15,3,ambient,

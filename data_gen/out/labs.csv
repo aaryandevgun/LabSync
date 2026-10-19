@@ -1,0 +1,5 @@
+lab_id,name,department_id,manager_id
+lab_moreno,Moreno Cell Biology,dept_life_sciences_demo,moreno_mgr
+lab_chen,Chen Imaging,dept_life_sciences_demo,chen_owner
+lab_patel,Patel Neurobiology,dept_life_sciences_demo,patel_mgr
+lab_rivera,Rivera Genetics,dept_life_sciences_demo,rivera_mgr

@@ -1,0 +1,27 @@
+{
+  "scenario_id": "imaging_tuesday_v1",
+  "random_seed": 20261103,
+  "timezone": "America/Chicago",
+  "scenario_now_local": "2026-10-28T10:00:00-05:00",
+  "demo_week_start": "2026-11-02",
+  "history_week_starts": [
+    "2026-09-21",
+    "2026-09-28",
+    "2026-10-05",
+    "2026-10-12",
+    "2026-10-19",
+    "2026-10-26"
+  ],
+  "staffed_hours_per_week": 40,
+  "staffed_window_local": [
+    "09:00",
+    "17:00"
+  ],
+  "canonical_request": {
+    "lab_id": "lab_moreno",
+    "requester_id": "morgan",
+    "text": "I need to image GFP-tagged cells Tuesday morning: three hours on a confocal, a prep room beforehand, and enough anti-GFP antibody and coverslips. I need the results by Wednesday."
+  },
+  "synthetic": true,
+  "note": "All records are synthetic demo data. Column names are not real iLab export formats."
+}

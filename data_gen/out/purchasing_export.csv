@@ -1,0 +1,8 @@
+order_id,line_id,lab_id,requester_id,sku_id,vendor_id,quantity,unit_price_usd,shipping_usd,state,created_local,need_by_date,ship_to,funding_hint_id,provenance
+po_patel_antigfp,po_patel_antigfp_l1,lab_patel,patel_mgr,ANTI_GFP_100,vendor_bioreagent,3,120,20,awaiting_lab_approval,2026-10-26T14:00:00-05:00,2026-11-04,north_bio_receiving,,synthetic:imaging_tuesday_v1
+po_patel_tips,po_patel_tips_l1,lab_patel,jordan_patel,TIPS_200,vendor_labbasics,4,42,15,awaiting_fund_approval,2026-10-23T11:00:00-05:00,2026-11-06,north_bio_receiving,,synthetic:imaging_tuesday_v1
+po_rivera_tips,po_rivera_tips_l1,lab_rivera,riley_rivera,TIPS_200,vendor_labbasics,6,42,15,awaiting_lab_approval,2026-10-27T09:30:00-05:00,2026-11-06,south_annex_receiving,,synthetic:imaging_tuesday_v1
+po_chen_dapi,po_chen_dapi_l1,lab_chen,chen_owner,DAPI_1ML,vendor_bioreagent,1,85,20,awaiting_lab_approval,2026-10-27T15:00:00-05:00,2026-11-05,north_bio_receiving,,synthetic:imaging_tuesday_v1
+po_rivera_dapi,po_rivera_dapi_l1,lab_rivera,rivera_mgr,DAPI_1ML,vendor_bioreagent,1,85,20,approved_request,2026-09-30T10:00:00-05:00,2026-10-09,north_bio_receiving,,synthetic:imaging_tuesday_v1
+po_rivera_dnakit,po_rivera_dnakit_l1,lab_rivera,rivera_mgr,DNA_KIT,vendor_bioreagent,2,310,20,awaiting_fund_approval,2026-10-22T13:00:00-05:00,2026-11-09,north_bio_receiving,fh_rivera_award_end,synthetic:imaging_tuesday_v1
+po_rivera_plates,po_rivera_plates_l1,lab_rivera,riley_rivera,PCR_PLATES,vendor_labbasics,3,64,15,approved_request,2026-10-20T10:00:00-05:00,2026-10-28,north_bio_receiving,,synthetic:imaging_tuesday_v1

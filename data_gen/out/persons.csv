@@ -1,0 +1,11 @@
+person_id,display_name,lab_id,role,qualifications
+morgan,Morgan (synthetic),lab_moreno,researcher,confocal_cert;wet_prep
+moreno_mgr,Moreno lab manager (synthetic),lab_moreno,lab_manager,confocal_cert;wet_prep
+chen_owner,Chen (synthetic),lab_chen,lab_manager,confocal_cert;wet_prep
+sam_chen,Sam (synthetic),lab_chen,researcher,confocal_cert;confocal_2_cert;wet_prep
+patel_mgr,Patel lab manager (synthetic),lab_patel,lab_manager,flow_cert;wet_prep
+jordan_patel,Jordan (synthetic),lab_patel,researcher,flow_cert;pcr_basic;wet_prep
+rivera_mgr,Rivera lab manager (synthetic),lab_rivera,lab_manager,pcr_basic;sequencer_cert;wet_prep
+riley_rivera,Riley (synthetic),lab_rivera,researcher,confocal_cert;confocal_2_cert;flow_cert;pcr_basic;wet_prep
+core_sched,Core scheduler (synthetic),,core_scheduler,
+dept_admin,Department admin (synthetic),,department_admin,

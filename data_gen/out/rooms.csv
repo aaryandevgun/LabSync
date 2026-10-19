@@ -1,0 +1,5 @@
+room_id,name,kind,capacity,capabilities,buffer_minutes,location,open_local,close_local
+prep_a,Prep Room A,wet_prep,4,wet_prep,10,north_bio_building,09:00,17:00
+prep_b,Prep Room B,wet_prep,4,wet_prep,10,north_bio_building,09:00,17:00
+analysis_room,Analysis Room,dry_analysis,6,dry_analysis,0,north_bio_building,09:00,17:00
+consult_room,Consult Room,meeting,8,meeting,0,north_bio_building,09:00,17:00
