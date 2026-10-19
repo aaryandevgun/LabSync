@@ -16,6 +16,15 @@ WEEK = "2026-11-02"
 
 
 def department_after_stage_1():
+    repo = stage_1_repo()
+    return {"snapshot": T.dept_get_snapshot(repo, "dept_admin", WEEK),
+            "pooled": T.insight_find_pooled_orders(repo, "dept_admin"),
+            "overloads": T.insight_find_overloads(repo, "dept_admin", WEEK),
+            "underuse": T.insight_find_underuse(repo, "dept_admin", WEEK)}
+
+
+def stage_1_repo():
+    """The repository after the canonical Stage 1 commit and Moreno's supply drafts."""
     repo = InMemoryRepository()
     plan_id = T.plan_create_draft(repo, "morgan", copy.deepcopy(GOAL))["plan_id"]
     found = T.scheduler_find_slots(repo, "morgan", plan_id)
@@ -27,10 +36,7 @@ def department_after_stage_1():
     T.approval_record(repo, "morgan", confirm["approval_id"], "approve")
     T.booking_commit_approved(repo, "morgan", prop["proposal_id"], "eval:commit")
     T.supply_create_order_draft(repo, "morgan", plan_id, "eval:orders")
-    return {"snapshot": T.dept_get_snapshot(repo, "dept_admin", WEEK),
-            "pooled": T.insight_find_pooled_orders(repo, "dept_admin"),
-            "overloads": T.insight_find_overloads(repo, "dept_admin", WEEK),
-            "underuse": T.insight_find_underuse(repo, "dept_admin", WEEK)}
+    return repo
 
 
 FINDINGS = [

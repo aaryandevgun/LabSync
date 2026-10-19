@@ -6,3 +6,4 @@ __pycache__/
 .mcp.json
 .coverage
 var/
+evals/results/

@@ -83,6 +83,12 @@ SCENARIOS = [
 
 def build_input(scenario):
     """Run the canonical proposal with the scenario's setup; return the actor's change-request result."""
+    repo, approval_id = build_repo(scenario)
+    return T.liaison_get_change_request(repo, scenario["actor_id"], approval_id)
+
+
+def build_repo(scenario):
+    """The repository right after the move request is sent (and pre-decided, if the setup says so)."""
     setup = scenario["setup"]
     repo = InMemoryRepository()
     for row in setup.get("insert_bookings", []):
@@ -94,7 +100,7 @@ def build_input(scenario):
     sent = T.liaison_request_change(repo, "morgan", prop["proposal_id"], "bk_chen_confocal", setup.get("message"))
     if setup.get("pre_decide"):
         T.approval_record(repo, "chen_owner", sent["approval_id"], setup["pre_decide"])
-    return T.liaison_get_change_request(repo, scenario["actor_id"], sent["approval_id"])
+    return repo, sent["approval_id"]
 
 
 def reference(scenario, change_request):
