@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LabSync · Local demo</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7.5 10.5 16M16 7.5 13.5 16M8.5 6h7"/></svg></div>
+        <span>LabSync<small>Research operations</small></span>
+      </div>
+      <nav class="nav" id="nav" aria-label="Sections"></nav>
+      <div class="sidebar-foot">
+        <div class="persona">
+          <label for="persona">Simulated identity</label>
+          <select id="persona" aria-describedby="persona-hint"></select>
+          <p class="hint" id="persona-hint">Demo persona switcher. Permissions are still checked on the server.</p>
+        </div>
+        <button class="btn sm ghost" id="demo-controls" type="button" aria-label="Demo controls"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Demo controls</span></button>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <div class="crumbs" id="crumbs"></div>
+        <div class="spacer"></div>
+        <span class="chip" id="chip-date"></span>
+        <span class="chip" id="chip-synthetic"><span class="dot"></span>Synthetic campus data</span>
+        <span class="chip warn" id="chip-c3" role="status"><span class="dot"></span>Local demo · C3 not connected</span>
+        <span class="chip" id="chip-agents"></span>
+      </header>
+      <main class="content" id="view" tabindex="-1"></main>
+    </div>
+  </div>
+  <div id="live" class="sr-only" aria-live="polite"></div>
+  <div id="modal-root"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
