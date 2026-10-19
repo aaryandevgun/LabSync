@@ -93,6 +93,7 @@ def test_owner_move_request_hidden_until_sent_and_ordered(repo, goal):
     assert ok(Q.list_notifications(repo, "chen_owner"))["notifications"][0]["channel"] == "in_app"
     assert sent["owner_id"] == "chen_owner"
     assert (sent["impact"]["booked_by"], sent["impact"]["flexible"]) == ("chen_owner", True)
+    assert sent["impact"]["person_conflicts"] == []  # Sam's 10:30-14:00 plate read is not Chen's own session
     # Impact shown to Chen lists only Chen's own lab bookings.
     labs = {repo.get_record("Booking", b["booking_id"])["lab_id"] for b in sent["impact"]["your_other_bookings_that_day"]}
     assert labs <= {"lab_chen"}
@@ -242,3 +243,13 @@ def test_fresh_repositories_are_deterministic(goal):
     for r in (a, b):
         authorize_owner_move(r, goal)
     assert a.list_records("AuditEvent") == b.list_records("AuditEvent")
+
+
+def test_move_request_flags_the_owners_own_overlapping_session(repo, goal):
+    repo.save_record("Booking", {"booking_id": "bk_chen_seq", "resource_id": "microscope_wide_1", "user_id": "chen_owner",
+                                 "lab_id": "lab_chen", "start_local": "2026-11-03T14:30:00-06:00",
+                                 "end_local": "2026-11-03T16:00:00-06:00", "status": "confirmed",
+                                 "flexible": False, "version": 1})
+    _, prop = propose_owner_move(repo, goal)
+    sent = ok(T.liaison_request_change(repo, "morgan", prop["proposal_id"], "bk_chen_confocal"))
+    assert sent["impact"]["person_conflicts"] == ["bk_chen_seq"]

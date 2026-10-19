@@ -23,7 +23,7 @@ from labsync_core.proposals import (HELD_STATES, approval_status, authorize_deci
 from labsync_core.slots import find_slots
 from labsync_core.supplies import check_stock, quote, supply_readiness
 from labsync_core.utilization import find_utilization_gaps, weekly_utilization
-from labsync_core.values import as_bool, as_list, as_num, iso, to_dt
+from labsync_core.values import as_bool, as_list, as_num, iso, overlaps, to_dt
 
 from . import approvals as approval_store
 from . import audit
@@ -462,18 +462,23 @@ def booking_propose(repo, actor_id, plan_id, option_id, idempotency_key):
 
 
 def _owner_impact(repo, proposal, move):
-    """What the displaced owner needs to judge a move, limited to their own lab's bookings."""
+    """What the displaced owner needs to judge a move, limited to their own lab's bookings.
+    `person_conflicts` lists the booker's own sessions that overlap the proposed new time."""
     day = to_dt(move["from"]["start"]).date()
     own = [b for b in repo.list_records("Booking") if b["lab_id"] == move["lab_id"]
            and to_dt(b["start_local"]).date() == day and b["booking_id"] != move["booking_id"]]
     requester_lab = repo.get_record("Lab", proposal["lab_id"])
+    owner_booking = repo.get_record("Booking", move["booking_id"])
     duration_same = (to_dt(move["from"]["end"]) - to_dt(move["from"]["start"])) == (
         to_dt(move["to"]["end"]) - to_dt(move["to"]["start"]))
     return {"booking_id": move["booking_id"], "resource_id": move["resource_id"], "from": move["from"],
             "to": move["to"], "same_duration": duration_same, "same_day": to_dt(move["to"]["start"]).date() == day,
             "requested_by_lab": requester_lab["name"] if requester_lab else proposal["lab_id"],
-            "booked_by": repo.get_record("Booking", move["booking_id"])["user_id"],
-            "flexible": as_bool(repo.get_record("Booking", move["booking_id"]).get("flexible")),
+            "booked_by": owner_booking["user_id"],
+            "flexible": as_bool(owner_booking.get("flexible")),
+            "person_conflicts": sorted(b["booking_id"] for b in own if b["user_id"] == owner_booking["user_id"]
+                                       and overlaps(b["start_local"], b["end_local"], move["to"]["start"],
+                                                    move["to"]["end"])),
             "your_other_bookings_that_day": [{"booking_id": b["booking_id"], "resource_id": b["resource_id"],
                                               "user_id": b["user_id"], "start": b["start_local"],
                                               "end": b["end_local"]} for b in own]}
