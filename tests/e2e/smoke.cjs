@@ -39,7 +39,7 @@ async function confirmModal(page, label) {
     await shot(page, "1-home");
 
     // Keyboard path: choose the sample chip, then Ctrl+Enter in the composer.
-    await page.getByRole("button", { name: "Schedule imaging experiment" }).click();
+    await page.getByRole("button", { name: "Plan an imaging experiment" }).click();
     await page.locator("#goal").focus();
     await page.keyboard.press("Control+Enter");
     await page.waitForURL(/#\/plans\//);

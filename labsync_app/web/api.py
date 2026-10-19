@@ -63,6 +63,7 @@ class WebAPI:
             ("GET", r"/api/plans/(?P<plan_id>[\w-]+)", self.plan),
             ("POST", r"/api/plans/(?P<plan_id>[\w-]+)/revise", self.revise_plan),
             ("POST", r"/api/plans/(?P<plan_id>[\w-]+)/hold", self.hold),
+            ("POST", r"/api/plans/(?P<plan_id>[\w-]+)/book", self.book),
             ("POST", r"/api/plans/(?P<plan_id>[\w-]+)/orders", self.draft_orders),
             ("POST", r"/api/proposals/(?P<proposal_id>[\w-]+)/request-moves", self.request_moves),
             ("POST", r"/api/proposals/(?P<proposal_id>[\w-]+)/commit", self.commit),
@@ -127,7 +128,7 @@ class WebAPI:
         waiting = queries.list_approval_queue(self.repo, actor)["waiting_on_me"]
         return {"status": "ok", "persona": me, "personas": people, "is_admin": me["role"] in T.ADMIN_ROLES,
                 "mode": getattr(self.o.client, "name", self.mode), "model": getattr(self.o.client, "model", None),
-                "c3_connected": False, "synthetic": True, "now": self.repo.now(), "demo_week": DEMO_WEEK,
+                "c3_connected": False, "synthetic": True, "empty_calendar": getattr(self.repo, "empty_calendar", False), "now": self.repo.now(), "demo_week": DEMO_WEEK,
                 "department": dept["name"].replace(" (synthetic)", ""), "building": dept["building_name"], "waiting_count": len(waiting),
                 "resource_names": {r.get("instrument_id") or r["room_id"]: r["name"]
                                    for r in self.repo.list_records("Instrument") + self.repo.list_records("Room")},
@@ -248,6 +249,12 @@ class WebAPI:
         if not body.get("option_id"):
             raise ApiError(400, "MISSING_OPTION", "Choose an option to hold.")
         return self.o.choose_option(actor, plan_id, body["option_id"])
+
+    def book(self, actor, plan_id, body, **_):
+        self._check_plan(actor, plan_id)
+        if not body.get("option_id"):
+            raise ApiError(400, "MISSING_OPTION", "Choose a time to book.")
+        return self.o.book_now(actor, plan_id, body["option_id"])
 
     def draft_orders(self, actor, plan_id, **_):
         self._check_plan(actor, plan_id)
@@ -429,7 +436,8 @@ class WebAPI:
 
     # ------------------------------------------------------------ demo controls
     def reset(self, actor, body, **_):
-        return self.o.reset(actor, body.get("token"))
+        empty = body.get("empty_calendar")
+        return self.o.reset(actor, body.get("token"), None if empty is None else bool(empty))
 
 
 def _stage(plan, proposal):

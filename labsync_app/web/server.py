@@ -122,6 +122,8 @@ def main(argv=None):
     parser.add_argument("--state", help="state file (default var/labsync_state.json)")
     parser.add_argument("--memory", action="store_true", help="keep state in memory only")
     parser.add_argument("--fresh", action="store_true", help="reset to the seed on start")
+    parser.add_argument("--empty-calendar", action="store_true",
+                        help="with --fresh: start with no bookings on the calendar (simple booking demo)")
     args = parser.parse_args(argv)
     from labsync_app.llm import LLMUnavailable
     try:
@@ -130,7 +132,7 @@ def main(argv=None):
         print("Live mode unavailable: %s" % exc)
         return 2
     if args.fresh:
-        api.repo.reset_to_seed()
+        api.repo.reset_to_seed(args.empty_calendar)
     if not os.environ.get(RESET_TOKEN_ENV):
         os.environ[RESET_TOKEN_ENV] = secrets.token_urlsafe(9)
         print("Demo reset token for this run: %s" % os.environ[RESET_TOKEN_ENV], flush=True)

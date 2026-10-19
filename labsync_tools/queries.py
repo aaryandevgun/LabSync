@@ -107,13 +107,15 @@ def list_notifications(repo, actor_id):
     return _ok(repo, notifications=notes, source_record_ids=[n["notification_id"] for n in notes])
 
 
-def reset_demo(repo, actor_id, token):
+def reset_demo(repo, actor_id, token, empty_calendar=None):
     """Developer-only: restore the exact `imaging_tuesday_v1` seed (docs/03). Requires the token in
     the LABSYNC_RESET_TOKEN environment variable; refuses if it is unset. Never touches real data:
     it only calls repo.reset_to_seed(), which the C3 implementation must limit to the demo sandbox."""
     expected = os.environ.get(RESET_TOKEN_ENV)
     if not expected or not isinstance(token, str) or not hmac.compare_digest(expected, token):
         return _deny(repo, actor_id, "reset_demo", "Demo", "imaging_tuesday_v1", code="RESET_NOT_ALLOWED")
-    repo.reset_to_seed()
-    audit.record(repo, actor_id, "reset_demo", "Demo", "imaging_tuesday_v1", after={"seed": "imaging_tuesday_v1"})
-    return _ok(repo, reset="imaging_tuesday_v1")
+    repo.reset_to_seed(empty_calendar)
+    empty = getattr(repo, "empty_calendar", False)
+    audit.record(repo, actor_id, "reset_demo", "Demo", "imaging_tuesday_v1",
+                 after={"seed": "imaging_tuesday_v1", "empty_calendar": empty})
+    return _ok(repo, reset="imaging_tuesday_v1", empty_calendar=empty)

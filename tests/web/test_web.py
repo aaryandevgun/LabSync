@@ -266,3 +266,44 @@ def test_release_hold_frees_slots_and_withdraws_requests(server):
     status, again, _ = call(base, "POST", "/api/proposals/%s/withdraw" % prop, {})
     assert status == 409 and again["code"] == "INVALID_TRANSITION"
     assert api.repo.get_record("Booking", "bk_chen_confocal")["start_local"] == "2026-11-03T10:00:00-06:00"
+
+
+def test_book_now_records_approval_and_refuses_options_that_move_others(server):
+    base, _ = server
+    _, r, _ = call(base, "POST", "/api/requests", {"text": "plate reader for 45 minutes Monday at 10"})
+    _, plan, _ = call(base, "GET", "/api/plans/" + r["plan_id"])
+    status, booked, _ = call(base, "POST", "/api/plans/%s/book" % r["plan_id"], {"option_id": plan["search"]["options"][0]["option_id"]})
+    assert status == 200 and booked["receipt"]["booking_ids"]
+    _, plan, _ = call(base, "GET", "/api/plans/" + r["plan_id"])
+    assert plan["stage"] == "confirmed"
+    assert [a["decision"] for a in plan["approvals"]] == ["approve"]  # Morgan's own approval is on record
+    _, act, _ = call(base, "GET", "/api/activity?request_id=" + plan["plan"]["request_id"])
+    ops = [e["operation"] for e in act["events"]]
+    assert "booking_propose" in ops and "booking_commit" in ops
+
+    _, r2, _ = call(base, "POST", "/api/requests", {"text": "confocal for 2 hours Tuesday at 10am"})
+    _, plan2, _ = call(base, "GET", "/api/plans/" + r2["plan_id"])
+    moving = plan2["search"]["options"][0]
+    assert moving["contingent_moves"]  # busy week: Chen's 10:00 session is in the way
+    status, refused, _ = call(base, "POST", "/api/plans/%s/book" % r2["plan_id"], {"option_id": moving["option_id"]})
+    assert status == 409 and refused["code"] == "NEEDS_OTHERS"
+    _, plan2, _ = call(base, "GET", "/api/plans/" + r2["plan_id"])
+    assert plan2["proposal"] is None  # nothing was held
+
+
+def test_reset_with_empty_calendar_clears_bookings_and_sticks(server):
+    base, api = server
+    status, r, _ = call(base, "POST", "/api/reset", {"token": TOKEN, "empty_calendar": True})
+    assert status == 200 and r["empty_calendar"] is True
+    assert api.repo.list_records("Booking") == [] and api.repo.list_records("RoomReservation") == []
+    assert api.repo.list_records("Instrument") and api.repo.list_records("OrderProposal")
+    _, s, _ = call(base, "GET", "/api/session")
+    assert s["empty_calendar"] is True
+    _, r, _ = call(base, "POST", "/api/requests", {"text": "confocal for 2 hours Tuesday at 10am"})
+    _, plan, _ = call(base, "GET", "/api/plans/" + r["plan_id"])
+    first = plan["search"]["options"][0]
+    assert first["kind"] == "direct" and first["start"] == "2026-11-03T10:00:00-06:00"
+    call(base, "POST", "/api/reset", {"token": TOKEN})  # no flag: keeps the empty calendar
+    assert api.repo.list_records("Booking") == []
+    call(base, "POST", "/api/reset", {"token": TOKEN, "empty_calendar": False})
+    assert len(api.repo.list_records("Booking")) > 10

@@ -31,7 +31,7 @@ class FileRepository(InMemoryRepository):
     # ---- persistence
     def _state(self):
         return {"format": FORMAT, "data": self._data, "clock": iso(self._clock), "counter": self._counter,
-                "writes": self._writes}
+                "writes": self._writes, "empty_calendar": self.empty_calendar}
 
     def _save(self):
         if self._loading:
@@ -52,11 +52,12 @@ class FileRepository(InMemoryRepository):
         self._clock = to_dt(state["clock"])
         self._counter = state["counter"]
         self._writes = state["writes"]
+        self.empty_calendar = state.get("empty_calendar", False)
 
     # ---- Repository protocol, locked and saved
-    def reset_to_seed(self):
+    def reset_to_seed(self, empty_calendar=None):
         with self._lock:
-            super().reset_to_seed()
+            super().reset_to_seed(empty_calendar)
             self._save()
 
     def now(self):

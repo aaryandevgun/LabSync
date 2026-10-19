@@ -18,6 +18,7 @@ SEED_FILES = {
     "RoomReservation": "room_schedule_export.csv", "OrderProposal": "purchasing_export.csv",
 }
 SCENARIO_NOW = "2026-10-28T10:00:00-05:00"
+CALENDAR_KINDS = ("Booking", "RoomReservation")
 
 
 def _load_seed(seed_dir):
@@ -47,11 +48,19 @@ class InMemoryRepository:
     def __init__(self, seed_dir=DEFAULT_SEED_DIR, now=SCENARIO_NOW):
         self._seed_dir = seed_dir
         self._start = now
+        self.empty_calendar = False
         self.reset_to_seed()
 
-    def reset_to_seed(self):
-        """Restore the exact canonical seed (docs/03 demo reset)."""
+    def reset_to_seed(self, empty_calendar=None):
+        """Restore the exact canonical seed (docs/03 demo reset). `empty_calendar` drops every seeded
+        instrument booking and room reservation (people, instruments, stock and orders stay), for a
+        simple booking demo; it sticks for later resets until changed."""
+        if empty_calendar is not None:
+            self.empty_calendar = bool(empty_calendar)
         self._data = _load_seed(self._seed_dir)
+        if self.empty_calendar:
+            for kind in CALENDAR_KINDS:
+                self._data[kind] = {}
         self._clock = to_dt(self._start)
         self._counter = 0
         self._writes = 0

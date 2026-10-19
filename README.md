@@ -41,7 +41,7 @@ An **AI lab operations copilot** helps a grad student/lab manager plan an experi
 The team chose to build LabSync as a standalone Python app (stdlib only, Python 3.9+); see `docs/PLAN.md` section 6. It runs locally on synthetic data. The header labels the data as synthetic.
 
 ```sh
-python3 -m labsync_app.web --fresh  # web app at http://127.0.0.1:8000 (prints the demo reset token)
+python3 -m labsync_app.web --fresh   # add --empty-calendar for a blank week  # web app at http://127.0.0.1:8000 (prints the demo reset token)
 python3 -m cli demo                 # the full story, pausing for each person's Approve
 python3 -m cli demo --auto          # same, pressing Approve automatically
 python3 -m cli ask "I need to image GFP-tagged cells Tuesday morning: three hours on a confocal, a prep room beforehand, and enough anti-GFP antibody and coverslips. I need the results by Wednesday." --as morgan

@@ -7,8 +7,9 @@
   var CANONICAL = "I need to image GFP-tagged cells Tuesday morning: three hours on a confocal, a prep room " +
     "beforehand, and enough anti-GFP antibody and coverslips. I need the results by Wednesday.";
   var PROMPTS = [
-    ["Schedule imaging experiment", CANONICAL],
+    ["Book the confocal", "confocal for 2 hours Tuesday at 10am"],
     ["Use the plate reader", "plate reader for 45 minutes Monday at 10"],
+    ["Plan an imaging experiment", CANONICAL],
     ["Reorder supplies", "a couple packs of anti-GFP and three boxes of coverslips"]
   ];
   var DAY0 = 9 * 60, DAY1 = 17 * 60;
@@ -321,6 +322,10 @@
     var declined = (d.proposal.contingent_moves || []).map(function (m) { return m.booking_id + "@" + m.to.start; });
     return o.contingent_moves.some(function (m) { return declined.indexOf(m.booking_id + "@" + m.to.start) >= 0; });
   }
+  /** An option the requester can book in one step: nobody moves and they are the only approver. */
+  function bookable(d, o) {
+    return !o.contingent_moves.length && o.approvals_required.length === 1 && o.approvals_required[0] === d.plan.requester_id;
+  }
   function rankedOptions(d, search) {
     if (!search) return [];
     return search.options.filter(function (o) { return !repeatsDecline(d, o); })
@@ -346,7 +351,7 @@
 
     var banners = "";
     if (S.lastRun && S.lastRun.plan_id === plan.plan_id) {
-      banners += '<div class="banner info">' + ic("spark") + "<div><b>Here's your plan.</b> Pick a time below and press Hold. Nothing is booked yet.</div></div>";
+      banners += '<div class="banner info">' + ic("spark") + "<div><b>Here's your plan.</b> Pick a time below. Nothing is booked yet.</div></div>";
     }
     if (d.receipt) {
       banners += '<div class="receipt" role="status"><div class="row">' + ic("check") + "<b>Booked.</b></div>" +
@@ -468,15 +473,18 @@
             '<div class="small">' + (o.prep ? "Prep in " + esc(resName(d, o.prep.resource_id)) + " " + esc(range(o.prep.start, o.prep.end)) + " · " : "") +
             (o.features.meets_preferred_window ? "Within your preferred window" : esc(o.features.hours_late) + " h later than preferred") + "</div>" +
             '<div class="small">' + (moves.length ? '<span class="badge awaiting">Needs owner approval</span> ' + esc(moves.join("; ")) : '<span class="badge ok">No one else moves</span>') + "</div>" +
-            '<div class="small muted">Needs an OK from: ' + esc(o.approvals_required.map(person).join(", ")) + "</div></button>";
+            (bookable(d, o) ? "" : '<div class="small muted">Needs an OK from: ' + esc(o.approvals_required.map(person).join(", ")) + "</div>") + "</button>";
         }).join("") + "</div>";
         var directIdx = options.map(function (o) { return o.kind; }).indexOf("direct");
         if (options[0].kind !== "direct" && directIdx > 0) {
-          html += '<p class="small" style="margin-top:10px">' + ic("info", 14) + " Want it booked without waiting on anyone? Option " + (directIdx + 1) + " needs no one else to move.</p>";
+          html += '<p class="small" style="margin-top:10px">' + ic("info", 14) + " Want it booked right away? Option " + (directIdx + 1) + " needs no one else, so you can book it in one click.</p>";
         }
-        if (d.is_requester) {
+        if (d.is_requester && option && bookable(d, option)) {
+          html += '<div class="row" style="margin-top:12px"><button class="btn primary" data-act="book">' + ic("check", 16) + "Book this time</button>" +
+            '<span class="why">No one else is affected, so you can book it now.</span></div>';
+        } else if (d.is_requester) {
           html += '<div class="row" style="margin-top:12px"><button class="btn primary" data-act="hold">' + ic("check", 16) + "Hold " + esc(option ? "option " + (options.indexOf(option) + 1) : "option") + "</button>" +
-            '<span class="why">Keeps this time for you while approvals come in. Nothing is booked yet.</span></div>';
+            '<span class="why">Keeps this time for you while the others approve. Nothing is booked yet.</span></div>';
         }
       }
       if (search.blocked_alternatives && search.blocked_alternatives.length) {
@@ -569,7 +577,7 @@
     var html = '<div class="panel"><div class="panel-h"><h2 id="h-rail">3. Approvals &amp; costs</h2></div><div class="panel-b stack">';
     var approvals = prop ? d.approvals : [];
     if (!prop) {
-      html += '<p class="muted small">' + (d.receipt ? "" : "Hold an option to see who needs to approve it.") + "</p>";
+      html += '<p class="muted small">' + (d.receipt ? "" : "Pick a time. If it needs anyone else's OK, they'll show up here.") + "</p>";
     } else {
       var need = approvals.filter(function (a) { return !(a.status === "decided" && a.decision === "approve"); }).length;
       html += '<div><div class="eyebrow" style="margin-bottom:8px">' + (need ? "Needs " + need + " approval" + (need > 1 ? "s" : "") : "All approvals received") + '</div><ul class="list">' +
@@ -687,6 +695,23 @@
         if (!r.ok) { busy(btn, false); toast(errText(r.data), true); return; }
         toast("Time held. Nothing is booked until everyone approves.");
         reload();
+      });
+    });
+    on("book", function () {
+      var parts = [[option.resource_id, option.start, option.end]].concat(option.prep ? [[option.prep.resource_id, option.prep.start, option.prep.end]] : []);
+      modal({
+        title: "Book this time", ok: "Book",
+        body: "<p>This books:</p><ul class=\"small\">" + parts.map(function (x) {
+          return "<li>" + esc(resName(d, x[0])) + " · " + esc(fmtDay(x[1])) + " " + esc(range(x[1], x[2])) + "</li>";
+        }).join("") + "</ul>",
+        onOk: function () {
+          return api("POST", "/api/plans/" + plan.plan_id + "/book", { option_id: option.option_id }).then(function (r) {
+            if (!r.ok) { toast(errText(r.data), true); reload(); return; }
+            toast("Booked. You're all set.");
+            S.lastRun = null;
+            reload();
+          });
+        }
       });
     });
     on("ask", function () {
@@ -1101,11 +1126,13 @@
       title: "Reset data", ok: "Reset", danger: true,
       body: '<p class="small">Puts every booking, order and approval back to the starting example, so you can run through it again.</p>' +
         '<div class="field" style="margin-top:12px"><label for="tok">Reset code (shown in the terminal when the app starts)</label><input id="tok" type="password" autocomplete="off" value="' + esc(token) + '"></div>' +
+        '<label class="toggle" style="margin-top:12px"><input type="checkbox" id="empty-cal"' + (S.session.empty_calendar ? " checked" : "") + "> Start with an empty calendar</label>" +
+        '<p class="small muted">Leave it ticked for a simple booking demo. Untick it to load the busy week where bookings clash.</p>' +
         '<p style="margin-top:14px"><button type="button" class="btn sm" id="seed">Fill in the sample request</button></p>',
       onOk: function (bg) {
         var t = bg.querySelector("#tok").value;
         try { sessionStorage.setItem("labsync.token", t); } catch (e) { /* ignore */ }
-        return api("POST", "/api/reset", { token: t }).then(function (r) {
+        return api("POST", "/api/reset", { token: t, empty_calendar: bg.querySelector("#empty-cal").checked }).then(function (r) {
           if (!r.ok) { toast(r.data.code === "RESET_NOT_ALLOWED" ? "Wrong reset code." : errText(r.data), true); return true; }
           S.selected = {}; S.lastRun = null;
           toast("Data reset.");

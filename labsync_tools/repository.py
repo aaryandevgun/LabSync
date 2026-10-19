@@ -58,5 +58,6 @@ class Repository(Protocol):
         Must reject an update whose stored version != expected_version (raise CommitWriteError).
         """
 
-    def reset_to_seed(self) -> None:
-        """Demo sandbox only: restore the canonical `imaging_tuesday_v1` seed exactly (docs/03)."""
+    def reset_to_seed(self, empty_calendar=None) -> None:
+        """Demo sandbox only: restore the canonical `imaging_tuesday_v1` seed exactly (docs/03).
+        empty_calendar=True drops the seeded bookings and room reservations; None keeps the last choice."""

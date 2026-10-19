@@ -18,7 +18,7 @@ This follows the run of show in `docs/03-PHASE-3-DEMO.md`, adapted to the local 
 
 | Clock | Do | Say / point at |
 |---|---|---|
-| 0:00–0:20 | On **Home**, click the chip **Schedule imaging experiment**. | "Running one experiment means coordinating equipment, rooms and supplies." |
+| 0:00–0:20 | On **Home**, click the chip **Plan an imaging experiment**. | "Running one experiment means coordinating equipment, rooms and supplies." |
 | 0:20–0:50 | Press **Generate plan**. | The Lab Agent turned the sentence into tasks (prep, then 3 h imaging), a window and supplies. The banner says "Nothing is booked yet." |
 | 0:50–1:25 | Point at the timeline. Click Chen's striped block on Confocal-1. | The popover says "Owned by Chen Imaging · confirmed 10:00–12:00 · flexible (request permission)". Point out the 15-minute cleaning buffers, the Option 2 that moves no one, and the red note that Confocal-2 requires certification. |
 | | Press **Hold option 1**, then **Ask Chen to move**, then **Send request**. | Commit stays disabled, and the reasons are listed under it. |
@@ -31,9 +31,9 @@ This follows the run of show in `docs/03-PHASE-3-DEMO.md`, adapted to the local 
 | 2:35–2:50 | Back on Insights, point at **Capacity imbalance**. | Confocal-1 37/40 h vs Confocal-2 8/40 h. Moving 8 flexible hours gives 29 h and 16 h, and nothing moves until each owner agrees. Flow-2 at 10% is the third card. |
 | 2:50–3:00 | Open the plan's **View history** and tick **Show details**. | Every change shows an actor, a time and before/after, plus the agent tool log. "From one request to smarter shared infrastructure." |
 
-## The simplest booking (no one else involved)
+## The simplest booking (empty calendar)
 
-As Morgan, click the chip **Use the plate reader** (or type "plate reader for 45 minutes Monday at 10") and press **Generate plan**. Option 1 is a free slot, so press **Hold option 1**, then **Approve final schedule**, then **Commit plan**. The confocal story above is busier on purpose: Confocal-1 is about 93% booked that week, which is the overload the department view later flags.
+Start with `python3 -m labsync_app.web --fresh --empty-calendar`, or tick **Start with an empty calendar** in **Reset data**. Nothing is booked that week, so every request goes straight through. As Morgan, click **Book the confocal** (or type "plate reader for 45 minutes Monday at 10"), press **Generate plan**, then **Book this time** and **Book**. It's confirmed, with Morgan's approval and every step in **View history**. The busy week below (untick the box) is where the Chen negotiation and the overload finding happen.
 
 ## If something goes wrong
 

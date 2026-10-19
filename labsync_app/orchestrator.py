@@ -127,6 +127,31 @@ class Orchestrator:
         key = "%s:commit:%s" % (self._request_id(proposal_id=proposal_id), proposal_id)
         return T.booking_commit_approved(self.repo, actor_id, proposal_id, key)
 
+    def book_now(self, actor_id, plan_id, option_id):
+        """'Book this time' for an option that needs no one else: the person's one confirmed click runs the
+        same three tool calls as Hold -> Approve final schedule -> Commit, each still checked and audited.
+        Options that move someone else's booking are refused; those keep the step-by-step flow."""
+        search = self.search(actor_id, plan_id)
+        option = next((o for o in search.get("options", []) if o["option_id"] == option_id), None)
+        if option is not None and (option["contingent_moves"] or option["approvals_required"] != [actor_id]):
+            return {"status": "error", "code": "NEEDS_OTHERS",
+                    "message": "This time needs someone else to agree. Use Hold instead."}
+        held = self.choose_option(actor_id, plan_id, option_id)
+        if held["status"] != "ok":
+            return held
+        if held["contingent_moves"] or any(a["approver_id"] != actor_id for a in held["approvals"]):
+            if not held.get("replayed"):
+                self.withdraw(actor_id, held["proposal_id"], "Book now refused: needs someone else")
+            return {"status": "error", "code": "NEEDS_OTHERS",
+                    "message": "This time needs someone else to agree. Use Hold instead."}
+        for appr in held["approvals"]:
+            if appr["status"] != "pending":
+                continue
+            decided = self.decide(actor_id, appr["approval_id"], "approve")
+            if decided["status"] != "ok":
+                return decided
+        return self.commit(actor_id, held["proposal_id"])
+
     def withdraw(self, actor_id, proposal_id, reason=None):
         """'Release hold': the requester drops a held proposal. Nothing confirmed changes."""
         return T.booking_withdraw(self.repo, actor_id, proposal_id, reason)
@@ -163,5 +188,5 @@ class Orchestrator:
     def activity(self, actor_id, request_id=None, entity_id=None):
         return T.audit_get_activity(self.repo, actor_id, request_id=request_id, entity_id=entity_id)
 
-    def reset(self, actor_id, token):
-        return queries.reset_demo(self.repo, actor_id, token)
+    def reset(self, actor_id, token, empty_calendar=None):
+        return queries.reset_demo(self.repo, actor_id, token, empty_calendar)
