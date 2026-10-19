@@ -6,6 +6,8 @@ the owner, the Optimizer writes cards. Every state change is a deterministic too
 host when a person presses a button (or confirms in the CLI). Nothing here records an approval on
 anyone's behalf.
 """
+import copy
+
 from labsync_tools import queries
 from labsync_tools import tools as T
 
@@ -45,6 +47,30 @@ class Orchestrator:
                 "parsed_goal": (last_call(run, "plan_create_draft") or {}).get("parsed_goal"),
                 "needs_input": draft["needs_input"] if draft else None,
                 "search": last_result(run, "scheduler_find_slots")}
+
+    def revise_plan(self, actor_id, plan_id, edits):
+        """A person's edit of the parsed plan (durations, times, supplies, missing facts). Saves a new
+        draft under the same request, which the scheduler then re-validates; the agent is not involved."""
+        plan = self.repo.get_record("ExperimentPlan", plan_id)
+        if plan is None:
+            return {"status": "error", "code": "NOT_FOUND", "message": "Unknown plan."}
+        if plan["requester_id"] != actor_id:
+            return {"status": "error", "code": "PERMISSION_DENIED", "message": "Only the requester can edit this plan."}
+        goal = copy.deepcopy(plan["goal"])
+        for key in ("desiredStart", "preferredEnd", "deadline", "missingInformation"):
+            if key in edits:
+                goal[key] = edits[key]
+        durations = edits.get("durations") or {}
+        required = edits.get("required") or {}
+        for step in goal["steps"]:
+            if step["stepId"] in durations:
+                step["durationMinutes"] = durations[step["stepId"]]
+            if step["stepId"] in required:
+                step["required"] = bool(required[step["stepId"]])
+        if "supplies" in edits:
+            goal["supplies"] = [{"skuId": s["skuId"], "quantity": s["quantity"], "source": "stated"}
+                                for s in edits["supplies"] if s.get("quantity")]
+        return T.plan_create_draft(self.repo, actor_id, goal, request_id=plan["request_id"])
 
     def search(self, actor_id, plan_id):
         return T.scheduler_find_slots(self.repo, actor_id, plan_id)
