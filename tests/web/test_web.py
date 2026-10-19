@@ -232,3 +232,37 @@ def test_browser_smoke(server, tmp_path):
                           capture_output=True, text=True, timeout=240)
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert "passed" in proc.stdout
+
+
+def test_typed_request_books_without_anyone_moving(server):
+    base, _ = server
+    _, r, _ = call(base, "POST", "/api/requests", {"text": "plate reader for 45 minutes Monday at 10"})
+    _, plan, _ = call(base, "GET", "/api/plans/" + r["plan_id"])
+    option = plan["search"]["options"][0]
+    assert option["kind"] == "direct" and option["start"] == "2026-11-02T10:00:00-06:00"
+    _, held, _ = call(base, "POST", "/api/plans/%s/hold" % r["plan_id"], {"option_id": option["option_id"]})
+    _, plan, _ = call(base, "GET", "/api/plans/" + r["plan_id"])
+    mine = next(a for a in plan["approvals"] if a["your_turn"])
+    call(base, "POST", "/api/approvals/%s/decide" % mine["approval_id"], {"decision": "approve"})
+    status, c, _ = call(base, "POST", "/api/proposals/%s/commit" % held["proposal_id"])
+    assert status == 200 and c["receipt"]["booking_ids"] == ["bk_%s_img" % held["proposal_id"]]
+
+
+def test_release_hold_frees_slots_and_withdraws_requests(server):
+    base, api = server
+    plan_id, prop = plan_and_hold(base)
+    call(base, "POST", "/api/proposals/%s/request-moves" % prop, {})
+    status, _, _ = call(base, "POST", "/api/proposals/%s/withdraw" % prop, {}, who="chen_owner")
+    assert status == 403
+    status, w, _ = call(base, "POST", "/api/proposals/%s/withdraw" % prop, {"reason": "not needed"})
+    assert status == 200 and w["state"] == "cancelled" and len(w["withdrawn_approval_ids"]) == 2
+    _, inbox, _ = call(base, "GET", "/api/approvals", who="chen_owner")
+    assert inbox["waiting_on_me"] == []
+    _, mine, _ = call(base, "GET", "/api/approvals")
+    assert mine["requested_by_me"] == []
+    _, plan, _ = call(base, "GET", "/api/plans/" + plan_id)
+    assert plan["stage"] == "needs_revision" and plan["search"]["options"][0]["kind"] == "owner_move"
+    assert not [r for r in plan["timeline"]["rows"] if r["status"] == "held"]
+    status, again, _ = call(base, "POST", "/api/proposals/%s/withdraw" % prop, {})
+    assert status == 409 and again["code"] == "INVALID_TRANSITION"
+    assert api.repo.get_record("Booking", "bk_chen_confocal")["start_local"] == "2026-11-03T10:00:00-06:00"

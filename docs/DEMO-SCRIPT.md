@@ -31,9 +31,14 @@ This follows the run of show in `docs/03-PHASE-3-DEMO.md`, adapted to the local 
 | 2:35–2:50 | Back on Insights, point at **Capacity imbalance**. | Confocal-1 37/40 h vs Confocal-2 8/40 h. Moving 8 flexible hours gives 29 h and 16 h, and nothing moves until each owner agrees. Flow-2 at 10% is the third card. |
 | 2:50–3:00 | Open the plan's **View audit trail** and tick **Tool execution**. | Every change shows an actor, a time and before/after, plus the agent tool log. "From one request to smarter shared infrastructure." |
 
+## The simplest booking (no one else involved)
+
+As Morgan, click the chip **Use the plate reader** (or type "plate reader for 45 minutes Monday at 10") and press **Generate plan**. Option 1 is a free slot, so press **Hold option 1**, then **Approve final schedule**, then **Commit plan**. The confocal story above is busier on purpose: Confocal-1 is about 93% booked that week, which is the overload the department view later flags.
+
 ## If something goes wrong
 
 - **Live agent is slow or down.** The app shows `LLM_UNAVAILABLE` and saves nothing. Restart without `--live`: the mock agents produce the same story.
+- **Old holds in the way.** A plan you held earlier keeps its slots until you open it and press **Release hold** (or reset).
 - **Wrong state.** Use Demo controls → Reset. The **Seed scenario: Imaging Tuesday** button fills in the sample request without submitting it.
 - **Rejection path, if asked.** As Chen, press **Suggest different time** or **Reject**. Chen's booking stays put. Morgan's plan shows the decline and offers the options again, including the 12:15–15:15 slot that moves no one.
 
@@ -41,4 +46,4 @@ This follows the run of show in `docs/03-PHASE-3-DEMO.md`, adapted to the local 
 
 - C3 isn't connected. This is a local Python app with a JSON file for storage.
 - None of the data is real: no UW data, no real prices, no real grants. The $95 is a potential saving, not a realized one.
-- The offline mock agents are rule-based. Only `--live` runs Claude.
+- The offline mock agents are rule-based: they know the sample sentences and simple keyword requests (instrument, day, time, duration, supplies). Only `--live` runs Claude.

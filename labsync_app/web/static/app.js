@@ -8,7 +8,7 @@
     "beforehand, and enough anti-GFP antibody and coverslips. I need the results by Wednesday.";
   var PROMPTS = [
     ["Schedule imaging experiment", CANONICAL],
-    ["Find a microscope", "Book a confocal for 1.5h this Friday afternoon to image GFP"],
+    ["Use the plate reader", "plate reader for 45 minutes Monday at 10"],
     ["Reorder supplies", "a couple packs of anti-GFP and three boxes of coverslips"]
   ];
   var DAY0 = 9 * 60, DAY1 = 17 * 60;
@@ -319,7 +319,7 @@
 
   function activeProposal(d) {
     var p = d.proposal;
-    return p && ["rejected", "stale", "failed"].indexOf(p.state) < 0 ? p : null;
+    return p && ["rejected", "stale", "failed", "cancelled"].indexOf(p.state) < 0 ? p : null;
   }
 
   /** After an owner declines, the scheduler (which doesn't know about the decline) still ranks that same move
@@ -444,8 +444,10 @@
     html += '<div class="panel"><div class="panel-h"><h2 id="h-sched">2. Schedule &amp; options</h2>' +
       '<label class="toggle"><input type="checkbox" id="buffers"' + (S.buffers ? " checked" : "") + "> Turnaround buffers</label></div>" +
       '<div class="panel-b">';
-    if (!tl.day) {
-      html += '<div class="empty"><b>No day yet</b>Add a day to the plan to see the schedule.</div>';
+    if (!d.goal.steps.some(function (s) { return s.kind === "instrument"; })) {
+      html += '<div class="empty"><b>Nothing to book</b>This is a supplies-only request. Draft the supply requests on the right.</div>';
+    } else if (!tl.day) {
+      html += '<div class="empty"><b>No day yet</b>Press Edit plan and add a day to see the schedule.</div>';
     } else {
       html += '<p class="small muted" style="margin-bottom:8px">' + esc(fmtDay(tl.day)) + " · other labs' bookings show as busy without names</p>" +
         '<div class="tl-scroll"><div class="tl" role="group" aria-label="Instrument and room timeline">' + timeline(d, option, prop) + "</div></div>" +
@@ -461,13 +463,16 @@
         prop.creates.map(function (c) { return "<div>" + esc(resName(d, c.resource_id)) + " · " + esc(range(c.start, c.end)) + " · <span class=\"muted\">" + (done ? "booked" : "held, not booked") + "</span></div>"; }).join("") +
         prop.contingent_moves.map(function (m) {
           return '<div style="margin-top:6px">' + ic("arrow", 13) + " " + esc(labOf(m.lab_id)) + "'s booking " + (done ? "moved " : "moves ") + esc(range(m.from.start, m.from.end)) + " → " + esc(range(m.to.start, m.to.end)) + (done ? " with their approval" : " if they approve") + "</div>";
-        }).join("") + "</div></div>";
+        }).join("") + (!done && d.is_requester ? '<div class="row" style="margin-top:10px"><button class="btn sm danger" data-act="release">' + ic("x", 14) + "Release hold</button>" +
+          '<span class="why">Frees these slots and withdraws the approval requests. Nothing confirmed changes.</span></div>' : "") + "</div></div>";
     } else if (search) {
       html += '<div class="panel" style="margin-top:16px"><div class="panel-h"><h3>Options</h3><span class="small muted">Ranked by the deterministic scheduler</span></div><div class="panel-b">';
       if (!search.options.length) {
-        html += '<div class="banner warn">' + ic("alert") + "<div><b>No viable slot in this window.</b> " +
-          esc(Object.keys(search.exclusion_counts || {}).map(function (k) { return search.exclusion_counts[k] + " " + k.toLowerCase().replace(/_/g, " "); }).join(", ")) +
-          ". Try a different day or a shorter duration with Edit plan.</div></div>";
+        var why = { BOOKED: "slots already booked", NOT_QUALIFIED: "instruments you aren't certified on", CAPABILITY_MISMATCH: "instruments that can't do this",
+          MAINTENANCE_OR_HOURS: "times outside staffed hours or in maintenance", NO_PREP_ROOM: "times with no free prep room", NO_MOVE_SLOT_FOR_OWNER: "owner sessions with nowhere to move" };
+        html += '<div class="banner warn">' + ic("alert") + "<div><b>Nothing free in this window.</b> The synthetic week is busy. Ruled out: " +
+          esc(Object.keys(search.exclusion_counts || {}).filter(function (k) { return k !== "CAPABILITY_MISMATCH"; }).map(function (k) { return search.exclusion_counts[k] + " " + (why[k] || k.toLowerCase().replace(/_/g, " ")); }).join(", ") || "no matching slots") +
+          ". Try another day with Edit plan, or a shorter session.</div></div>";
       } else {
         html += '<div class="opts" role="group" aria-label="Booking options">' + options.map(function (o, i) {
           var moves = o.contingent_moves.map(function (m) { return person(m.owner_id) + " moves " + range(m.from.start, m.from.end) + " → " + range(m.to.start, m.to.end); });
@@ -479,6 +484,10 @@
             '<div class="small">' + (moves.length ? '<span class="badge awaiting">Needs owner approval</span> ' + esc(moves.join("; ")) : '<span class="badge ok">No one else moves</span>') + "</div>" +
             '<div class="small muted">Approvals: ' + esc(o.approvals_required.map(person).join(", ")) + " · score " + esc(o.score) + "</div></button>";
         }).join("") + "</div>";
+        var directIdx = options.map(function (o) { return o.kind; }).indexOf("direct");
+        if (options[0].kind !== "direct" && directIdx > 0) {
+          html += '<p class="small" style="margin-top:10px">' + ic("info", 14) + " Want it booked without waiting on anyone? Option " + (directIdx + 1) + " needs no one else to move.</p>";
+        }
         if (d.is_requester) {
           html += '<div class="row" style="margin-top:12px"><button class="btn primary" data-act="hold">' + ic("check", 16) + "Hold " + esc(option ? "option " + (options.indexOf(option) + 1) : "option") + "</button>" +
             '<span class="why">Holding reserves nothing: it creates a proposal that waits for approvals.</span></div>';
@@ -522,8 +531,10 @@
           var raw = r.booking_id.replace(/^hold:/, ""), moveTarget = raw.indexOf("move:") === 0 ? raw.slice(5) : null;
           var ours = moveTarget ? moveIds.indexOf(moveTarget) >= 0 && !!prop : mineIds.indexOf(raw) >= 0;
           if (ours && moveTarget) return;  // drawn below as the owner's proposed new time
-          b.cls = "held"; b.title = ours ? "Proposed · " + person(d.plan.requester_id) : "Held by another request";
-          b.detail = ours ? "Held for proposal " + prop.proposal_id + ", not booked. It becomes a booking only after every approval and the commit." : "Another request is holding this slot. It is not confirmed.";
+          b.cls = "held"; b.title = ours ? "Proposed · " + person(d.plan.requester_id) : r.user_id ? "Your lab · held" : "Held by another request";
+          b.detail = ours ? "Held for proposal " + prop.proposal_id + ", not booked. It becomes a booking only after every approval and the commit." :
+            r.user_id ? person(r.user_id) + " is holding this slot for another plan in your lab. Open that plan and press Release hold if it's not needed." :
+            "Another lab's request is holding this slot. It is not confirmed.";
         } else if (move && !committed) {
           b.cls = "conflict"; b.title = labOf(move.lab_id) + " · flexible";
           b.detail = "Owned by " + labOf(move.lab_id) + " · confirmed " + range(r.start, r.end) + " · flexible (request permission). Proposed move: " + range(move.to.start, move.to.end) + ", same day and length.";
@@ -732,6 +743,20 @@
             if (!r.ok) { toast(errText(r.data), true); reload(); return; }
             toast("Committed. Receipt " + r.data.receipt.receipt_id + ".");
             S.lastRun = null;
+            reload();
+          });
+        }
+      });
+    });
+    on("release", function () {
+      modal({
+        title: "Release hold", ok: "Release", danger: true,
+        body: "<p>This frees the held slots and withdraws the open approval requests" + (prop.contingent_moves.length ? ", including the move request to " + esc(prop.contingent_moves.map(function (m) { return person(m.owner_id); }).join(", ")) : "") +
+          ". Nothing that's already confirmed changes. You can pick another option afterwards.</p>",
+        onOk: function () {
+          return api("POST", "/api/proposals/" + prop.proposal_id + "/withdraw", { reason: "Released by requester" }).then(function (r) {
+            if (!r.ok) { toast(errText(r.data), true); return; }
+            toast("Hold released. Pick another option or edit the plan.");
             reload();
           });
         }
