@@ -34,7 +34,7 @@ def list_approval_queue(repo, actor_id):
                 waiting.append(_card(repo, a))
         elif a["approver_id"] == actor_id and a["status"] == "decided":
             history.append(_card(repo, a))
-        if a["requested_by"] == actor_id and a["approver_id"] != actor_id and a["status"] != "decided":
+        if a["requested_by"] == actor_id and a["approver_id"] != actor_id and a["status"] not in ("decided", "withdrawn"):
             mine.append(_card(repo, a))
     key = lambda c: (c["created_at"], c["approval_id"])
     return _ok(repo, waiting_on_me=sorted(waiting, key=key), requested_by_me=sorted(mine, key=key),

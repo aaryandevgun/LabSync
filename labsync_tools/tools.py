@@ -706,6 +706,47 @@ def booking_commit_approved(repo, actor_id, proposal_id, idempotency_key):
                source_record_ids=[proposal_id] + receipt["booking_ids"])
 
 
+def booking_withdraw(repo, actor_id, proposal_id, reason=None):
+    """Release a held proposal the requester no longer wants. Requester only; not an agent tool.
+
+    The held slots stop blocking the calendar, open approval requests are withdrawn (they leave
+    the approvers' inboxes) and the plan goes back to needs_revision. Confirmed bookings are never
+    touched: a committed proposal can't be withdrawn.
+
+    Args:
+        actor_id (str): the proposal's requester.
+        proposal_id (str).
+        reason (str, optional).
+    Returns:
+        {"status": "ok", "proposal_id", "state": "cancelled", "withdrawn_approval_ids": [...]}
+        Errors: NOT_FOUND, PERMISSION_DENIED, INVALID_TRANSITION.
+    """
+    proposal = repo.get_record("ReservationProposal", proposal_id)
+    if proposal is None:
+        return _err("NOT_FOUND", "Unknown proposal.")
+    if proposal["requester_id"] != actor_id:
+        return _deny(repo, actor_id, "booking_withdraw", "ReservationProposal", proposal_id)
+    if proposal["state"] not in HELD_STATES:
+        return _err("INVALID_TRANSITION", "Only a held proposal can be withdrawn.", state=proposal["state"])
+    labs = [proposal["lab_id"]] + [m["lab_id"] for m in proposal["contingent_moves"]]
+    withdrawn = []
+    for a in approval_store.for_entity(repo, "ReservationProposal", proposal_id):
+        if a["status"] in ("not_sent", "pending"):
+            repo.save_record("Approval", dict(a, status="withdrawn", decided_at=repo.now(), reason=reason))
+            audit.record(repo, actor_id, "approval_withdrawn", "Approval", a["approval_id"],
+                         request_id=a.get("request_id"), before={"status": a["status"]}, after={"status": "withdrawn"},
+                         lab_ids=[a.get("lab_id"), proposal["lab_id"]], source_ids=[proposal_id], detail=reason)
+            withdrawn.append(a["approval_id"])
+    _transition(repo, "ReservationProposal", proposal, "cancelled", actor_id, "booking_withdraw", lab_ids=labs,
+                detail=reason)
+    plan = repo.get_record("ExperimentPlan", proposal["plan_id"])
+    if plan["state"] in ("approval_pending", "ready_to_commit"):
+        _transition(repo, "ExperimentPlan", plan, "needs_revision", actor_id, "plan_state", lab_ids=labs,
+                    detail="WITHDRAWN")
+    return _ok(repo, proposal_id=proposal_id, state="cancelled", withdrawn_approval_ids=withdrawn,
+               source_record_ids=[proposal_id] + withdrawn)
+
+
 # ---------------------------------------------------------------- department
 
 def _require_admin(repo, actor_id, operation):

@@ -127,6 +127,10 @@ class Orchestrator:
         key = "%s:commit:%s" % (self._request_id(proposal_id=proposal_id), proposal_id)
         return T.booking_commit_approved(self.repo, actor_id, proposal_id, key)
 
+    def withdraw(self, actor_id, proposal_id, reason=None):
+        """'Release hold': the requester drops a held proposal. Nothing confirmed changes."""
+        return T.booking_withdraw(self.repo, actor_id, proposal_id, reason)
+
     def draft_orders(self, actor_id, plan_id):
         key = "%s:orders" % self._request_id(plan_id=plan_id)
         return T.supply_create_order_draft(self.repo, actor_id, plan_id, key)

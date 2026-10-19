@@ -66,6 +66,7 @@ class WebAPI:
             ("POST", r"/api/plans/(?P<plan_id>[\w-]+)/orders", self.draft_orders),
             ("POST", r"/api/proposals/(?P<proposal_id>[\w-]+)/request-moves", self.request_moves),
             ("POST", r"/api/proposals/(?P<proposal_id>[\w-]+)/commit", self.commit),
+            ("POST", r"/api/proposals/(?P<proposal_id>[\w-]+)/withdraw", self.withdraw),
             ("GET", r"/api/approvals", self.approvals),
             ("POST", r"/api/approvals/(?P<approval_id>[\w-]+)/decide", self.decide),
             ("GET", r"/api/calendar", self.calendar),
@@ -264,6 +265,9 @@ class WebAPI:
     def commit(self, actor, proposal_id, **_):
         return self.o.commit(actor, proposal_id)
 
+    def withdraw(self, actor, proposal_id, body, **_):
+        return self.o.withdraw(actor, proposal_id, body.get("reason"))
+
     # ------------------------------------------------------------ approvals
     def _approval_card(self, card, actor):
         card = dict(card)
@@ -446,8 +450,8 @@ def _commit_blockers(proposal, approvals):
         return ["Hold an option first."]
     if proposal["state"] == "committed":
         return []
-    if proposal["state"] in ("rejected", "stale", "failed"):
-        return ["This proposal is %s; choose another option." % proposal["state"]]
+    if proposal["state"] in ("rejected", "stale", "failed", "cancelled"):
+        return ["Choose an option and hold it."]
     out = []
     for a in approvals:
         if a["status"] == "decided" and a["decision"] == "approve":
@@ -480,6 +484,7 @@ EVENT_LABELS = {
     "insight_propose_action": "Action proposed", "insight_await_approvals": "Waiting for approvals",
     "forecast_resource_demand": "Forecast computed", "reset_demo": "Demo reset",
     "booking_commit_compensated": "Commit undone after a failure",
+    "booking_withdraw": "Hold released by the requester", "approval_withdrawn": "Approval request withdrawn",
 }
 STATE_WORDS = {
     "owner_approval_pending": "waiting for the owner", "requester_approval_pending": "waiting for the requester",
