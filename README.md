@@ -41,6 +41,7 @@ An **AI lab operations copilot** helps a grad student/lab manager plan an experi
 The team chose to build LabSync as a standalone Python app (stdlib only, Python 3.9+); see `docs/PLAN.md` section 6. It runs locally on synthetic data and is labelled "Local demo · C3 not connected".
 
 ```sh
+python3 -m labsync_app.web --fresh  # web app at http://127.0.0.1:8000 (prints the demo reset token)
 python3 -m cli demo                 # the full story, pausing for each person's Approve
 python3 -m cli demo --auto          # same, pressing Approve automatically
 python3 -m cli ask "I need to image GFP-tagged cells Tuesday morning: three hours on a confocal, a prep room beforehand, and enough anti-GFP antibody and coverslips. I need the results by Wednesday." --as morgan
@@ -49,7 +50,7 @@ python3 -m evals.run --mock         # score the eval suites (mock agents check t
 python3 -m pytest tests -q
 ```
 
-State is saved to `var/labsync_state.json` (`--memory` keeps it in memory only). By default the agents run on a deterministic offline mock, which only understands the sample requests from the few-shots and evals. To use Claude, set `ANTHROPIC_API_KEY` and add `--live`. The model defaults to `claude-sonnet-5-5`; you can change it with `LABSYNC_MODEL`. In either mode, the agents only parse, advise and write. Every booking, order and recommendation still goes through an Approval made by a person.
+State is saved to `var/labsync_state.json` (`--memory` keeps it in memory only). By default the agents run on a deterministic offline mock, which only understands the sample requests from the few-shots and evals. To use Claude, set `ANTHROPIC_API_KEY` and add `--live`. The model defaults to `claude-sonnet-5-5`; you can change it with `LABSYNC_MODEL`. The web app has three screens from `docs/07-UI-UX.md` (My Lab, Approvals, Department) and a simulated-identity switcher. The 3-minute walkthrough is in `docs/DEMO-SCRIPT.md`. In either mode, the agents only parse, advise and write. Every booking, order and recommendation still goes through an Approval made by a person.
 
 ## Top-line definition of done
 
