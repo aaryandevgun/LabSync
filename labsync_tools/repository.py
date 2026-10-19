@@ -24,6 +24,7 @@ ID_FIELDS = {
     "ExperimentPlan": "plan_id", "ReservationProposal": "proposal_id", "Approval": "approval_id",
     "OrderProposal": "order_id", "DepartmentInsight": "insight_id", "ForecastRun": "forecast_run_id",
     "AuditEvent": "audit_id", "CommitReceipt": "idempotency_key", "Notification": "notification_id",
+    "AgentRun": "run_id",
 }
 
 
