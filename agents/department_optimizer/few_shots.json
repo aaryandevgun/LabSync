@@ -1,0 +1,1412 @@
+[
+  {
+    "id": "opt-after-stage-1",
+    "description": "After the canonical Stage 1 commit and Moreno's order drafts: the three planted findings.",
+    "context": {
+      "actor_id": "dept_admin",
+      "lab_id": null,
+      "now": "2026-10-28T10:00:00-05:00",
+      "week_start": "2026-11-02"
+    },
+    "input": {
+      "snapshot": {
+        "status": "ok",
+        "data_timestamp": "2026-10-28T10:00:57-05:00",
+        "snapshot_id": "snap_8dcbc982d756e141",
+        "week_start": "2026-11-02",
+        "utilization": [
+          {
+            "resource_id": "confocal_1",
+            "booked_hours": 37.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.925
+          },
+          {
+            "resource_id": "confocal_2",
+            "booked_hours": 8.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.2
+          },
+          {
+            "resource_id": "flow_1",
+            "booked_hours": 30.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.75
+          },
+          {
+            "resource_id": "flow_2",
+            "booked_hours": 4.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.1
+          },
+          {
+            "resource_id": "pcr_1",
+            "booked_hours": 18.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.45
+          },
+          {
+            "resource_id": "pcr_2",
+            "booked_hours": 10.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.25
+          },
+          {
+            "resource_id": "centrifuge_1",
+            "booked_hours": 12.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.3
+          },
+          {
+            "resource_id": "plate_reader_1",
+            "booked_hours": 14.0,
+            "available_hours": 36.0,
+            "maintenance_hours": 4.0,
+            "utilization": 0.3889
+          },
+          {
+            "resource_id": "sequencer_1",
+            "booked_hours": 9.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.225
+          },
+          {
+            "resource_id": "microscope_wide_1",
+            "booked_hours": 11.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.275
+          }
+        ],
+        "open_proposals": {
+          "committed": 1
+        },
+        "open_orders": [
+          {
+            "order_id": "po_patel_antigfp",
+            "sku_id": "ANTI_GFP_100",
+            "lab_id": "lab_patel",
+            "quantity": 3,
+            "state": "awaiting_lab_approval"
+          },
+          {
+            "order_id": "po_patel_tips",
+            "sku_id": "TIPS_200",
+            "lab_id": "lab_patel",
+            "quantity": 4,
+            "state": "awaiting_fund_approval"
+          },
+          {
+            "order_id": "po_rivera_tips",
+            "sku_id": "TIPS_200",
+            "lab_id": "lab_rivera",
+            "quantity": 6,
+            "state": "awaiting_lab_approval"
+          },
+          {
+            "order_id": "po_chen_dapi",
+            "sku_id": "DAPI_1ML",
+            "lab_id": "lab_chen",
+            "quantity": 1,
+            "state": "awaiting_lab_approval"
+          },
+          {
+            "order_id": "po_rivera_dapi",
+            "sku_id": "DAPI_1ML",
+            "lab_id": "lab_rivera",
+            "quantity": 1,
+            "state": "approved_request"
+          },
+          {
+            "order_id": "po_rivera_dnakit",
+            "sku_id": "DNA_KIT",
+            "lab_id": "lab_rivera",
+            "quantity": 2,
+            "state": "awaiting_fund_approval"
+          },
+          {
+            "order_id": "po_rivera_plates",
+            "sku_id": "PCR_PLATES",
+            "lab_id": "lab_rivera",
+            "quantity": 3,
+            "state": "approved_request"
+          },
+          {
+            "order_id": "po_0023",
+            "sku_id": "ANTI_GFP_100",
+            "lab_id": "lab_moreno",
+            "quantity": 2,
+            "state": "awaiting_lab_approval"
+          },
+          {
+            "order_id": "po_0028",
+            "sku_id": "COVERSLIP_24",
+            "lab_id": "lab_moreno",
+            "quantity": 1,
+            "state": "awaiting_lab_approval"
+          }
+        ],
+        "restricted_signals_count": 1,
+        "source_record_ids": [
+          "centrifuge_1",
+          "confocal_1",
+          "confocal_2",
+          "flow_1",
+          "flow_2",
+          "microscope_wide_1",
+          "pcr_1",
+          "pcr_2",
+          "plate_reader_1",
+          "po_0023",
+          "po_0028",
+          "po_chen_dapi",
+          "po_patel_antigfp",
+          "po_patel_tips",
+          "po_rivera_dapi",
+          "po_rivera_dnakit",
+          "po_rivera_plates",
+          "po_rivera_tips",
+          "sequencer_1"
+        ],
+        "assumptions": [],
+        "warnings": []
+      },
+      "pooled": {
+        "status": "ok",
+        "data_timestamp": "2026-10-28T10:00:58-05:00",
+        "insights": [
+          {
+            "insight_id": "ins_pool_anti_gfp_100_moreno_patel",
+            "kind": "pooled_order",
+            "input_snapshot_id": "snap_8dcbc982d756e141",
+            "candidate_ids": [
+              "po_0023",
+              "po_patel_antigfp"
+            ],
+            "lab_ids": [
+              "lab_moreno",
+              "lab_patel"
+            ],
+            "estimate": {
+              "unpooled_total_usd": 640,
+              "pooled_total_usd": 545,
+              "potential_savings_usd": 95,
+              "volume_component_usd": 75,
+              "shipping_component_usd": 20,
+              "pooled_unit_price_usd": 105,
+              "total_quantity": 5,
+              "formula": "separate 2x120+20 + 3x120+20 = 640; pooled 5x105+20 = 545; potential 95",
+              "realized_savings_usd": null,
+              "status": "potential"
+            },
+            "units": "USD (potential, not realized)",
+            "required_approvals": [
+              "moreno_mgr",
+              "patel_mgr",
+              "dept_admin"
+            ],
+            "assumptions": [
+              "synthetic vendor tier",
+              "single pooled shipping destination",
+              "separate cost allocation per lab; no grant money moves",
+              "finance policy approval required"
+            ],
+            "realized_savings_usd": null,
+            "detail": {
+              "sku_id": "ANTI_GFP_100",
+              "vendor_id": "vendor_bioreagent",
+              "ship_to": "north_bio_receiving",
+              "quantities_by_lab": {
+                "lab_moreno": 2,
+                "lab_patel": 3
+              }
+            },
+            "state": "detected"
+          }
+        ],
+        "exclusions": [
+          {
+            "sku_id": "DAPI_1ML",
+            "order_ids": [
+              "po_rivera_dapi"
+            ],
+            "reason": "STATE_LOCKED"
+          },
+          {
+            "sku_id": "TIPS_200",
+            "order_ids": [
+              "po_patel_tips",
+              "po_rivera_tips"
+            ],
+            "reason": "DIFFERENT_SHIP_TO"
+          }
+        ],
+        "snapshot_id": "snap_8dcbc982d756e141",
+        "source_record_ids": [
+          "po_0023",
+          "po_patel_antigfp"
+        ],
+        "assumptions": [],
+        "warnings": []
+      },
+      "overloads": {
+        "status": "ok",
+        "data_timestamp": "2026-10-28T10:00:59-05:00",
+        "insights": [
+          {
+            "insight_id": "ins_overload_confocal_1_confocal_2_20261102",
+            "kind": "overload_rebalance",
+            "input_snapshot_id": "snap_8dcbc982d756e141",
+            "week_start": "2026-11-02",
+            "candidate_ids": [
+              "bk_confocal_1_20261104_0900",
+              "bk_confocal_1_20261105_0900"
+            ],
+            "lab_ids": [
+              "lab_chen",
+              "lab_rivera"
+            ],
+            "estimate": {
+              "source": "confocal_1",
+              "target": "confocal_2",
+              "movable_hours": 8.0,
+              "before": {
+                "source_hours": 37.0,
+                "target_hours": 8.0,
+                "source_utilization": 0.925,
+                "target_utilization": 0.2
+              },
+              "after": {
+                "source_hours": 29.0,
+                "target_hours": 16.0,
+                "source_utilization": 0.725,
+                "target_utilization": 0.4
+              },
+              "total_hours_before": 45.0,
+              "total_hours_after": 45.0,
+              "moves": [
+                {
+                  "booking_id": "bk_confocal_1_20261104_0900",
+                  "owner_id": "riley_rivera",
+                  "lab_id": "lab_rivera",
+                  "hours": 4.0,
+                  "start": "2026-11-04T09:00:00-06:00",
+                  "end": "2026-11-04T13:00:00-06:00",
+                  "from_resource": "confocal_1",
+                  "to_resource": "confocal_2"
+                },
+                {
+                  "booking_id": "bk_confocal_1_20261105_0900",
+                  "owner_id": "sam_chen",
+                  "lab_id": "lab_chen",
+                  "hours": 4.0,
+                  "start": "2026-11-05T09:00:00-06:00",
+                  "end": "2026-11-05T13:00:00-06:00",
+                  "from_resource": "confocal_1",
+                  "to_resource": "confocal_2"
+                }
+              ],
+              "excluded": [
+                {
+                  "booking_id": "bk_chen_confocal",
+                  "reason": "NOT_QUALIFIED",
+                  "missing": [
+                    "confocal_2_cert"
+                  ]
+                }
+              ],
+              "required_approvals": [
+                "riley_rivera",
+                "sam_chen"
+              ],
+              "reason": null,
+              "value_unit": "hours of congestion relieved (not money)"
+            },
+            "units": "hours of congestion relieved (not money)",
+            "required_approvals": [
+              "riley_rivera",
+              "sam_chen",
+              "dept_admin"
+            ],
+            "assumptions": [
+              "same session times on the equivalent instrument",
+              "owner approval required per booking"
+            ],
+            "state": "detected"
+          }
+        ],
+        "snapshot_id": "snap_8dcbc982d756e141",
+        "source_record_ids": [
+          "bk_confocal_1_20261104_0900",
+          "bk_confocal_1_20261105_0900"
+        ],
+        "assumptions": [],
+        "warnings": []
+      },
+      "underuse": {
+        "status": "ok",
+        "data_timestamp": "2026-10-28T10:01:00-05:00",
+        "insights": [
+          {
+            "insight_id": "ins_underuse_flow_2_20261102",
+            "kind": "underuse",
+            "input_snapshot_id": "snap_8dcbc982d756e141",
+            "week_start": "2026-11-02",
+            "candidate_ids": [
+              "flow_2"
+            ],
+            "lab_ids": [],
+            "estimate": {
+              "resource_id": "flow_2",
+              "utilization": 0.1,
+              "booked_hours": 4.0,
+              "available_hours": 40.0,
+              "history": [
+                {
+                  "week_start": "2026-09-21",
+                  "booked_hours": 6.0,
+                  "requested_hours": 6.0,
+                  "utilization": 0.15
+                },
+                {
+                  "week_start": "2026-09-28",
+                  "booked_hours": 5.0,
+                  "requested_hours": 5.0,
+                  "utilization": 0.125
+                },
+                {
+                  "week_start": "2026-10-05",
+                  "booked_hours": 7.0,
+                  "requested_hours": 7.0,
+                  "utilization": 0.175
+                },
+                {
+                  "week_start": "2026-10-12",
+                  "booked_hours": 4.0,
+                  "requested_hours": 4.0,
+                  "utilization": 0.1
+                },
+                {
+                  "week_start": "2026-10-19",
+                  "booked_hours": 6.0,
+                  "requested_hours": 6.0,
+                  "utilization": 0.15
+                },
+                {
+                  "week_start": "2026-10-26",
+                  "booked_hours": 5.0,
+                  "requested_hours": 5.0,
+                  "utilization": 0.125
+                }
+              ],
+              "low_weeks": 6,
+              "weeks_observed": 6,
+              "persistent": true,
+              "overflow_sources": [
+                {
+                  "resource_id": "flow_1",
+                  "avg_unmet_hours_per_week": 4.0,
+                  "utilization": 0.75
+                }
+              ],
+              "status": "advisory",
+              "suggested_next_steps": [
+                "publish available capacity to qualified users",
+                "match overflow demand from equivalent instruments",
+                "compare borrow / extend staffed hours / buy before any purchase"
+              ],
+              "caveat": "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            },
+            "units": "share of staffed hours",
+            "required_approvals": [
+              "dept_admin"
+            ],
+            "assumptions": [
+              "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            ],
+            "state": "detected"
+          },
+          {
+            "insight_id": "ins_underuse_confocal_2_20261102",
+            "kind": "underuse",
+            "input_snapshot_id": "snap_8dcbc982d756e141",
+            "week_start": "2026-11-02",
+            "candidate_ids": [
+              "confocal_2"
+            ],
+            "lab_ids": [],
+            "estimate": {
+              "resource_id": "confocal_2",
+              "utilization": 0.2,
+              "booked_hours": 8.0,
+              "available_hours": 40.0,
+              "history": [
+                {
+                  "week_start": "2026-09-21",
+                  "booked_hours": 7.0,
+                  "requested_hours": 7.0,
+                  "utilization": 0.175
+                },
+                {
+                  "week_start": "2026-09-28",
+                  "booked_hours": 10.0,
+                  "requested_hours": 11.0,
+                  "utilization": 0.25
+                },
+                {
+                  "week_start": "2026-10-05",
+                  "booked_hours": 8.0,
+                  "requested_hours": 8.0,
+                  "utilization": 0.2
+                },
+                {
+                  "week_start": "2026-10-12",
+                  "booked_hours": 9.0,
+                  "requested_hours": 10.0,
+                  "utilization": 0.225
+                },
+                {
+                  "week_start": "2026-10-19",
+                  "booked_hours": 6.0,
+                  "requested_hours": 6.0,
+                  "utilization": 0.15
+                },
+                {
+                  "week_start": "2026-10-26",
+                  "booked_hours": 8.0,
+                  "requested_hours": 8.0,
+                  "utilization": 0.2
+                }
+              ],
+              "low_weeks": 5,
+              "weeks_observed": 6,
+              "persistent": true,
+              "overflow_sources": [
+                {
+                  "resource_id": "confocal_1",
+                  "avg_unmet_hours_per_week": 4.0,
+                  "utilization": 0.925
+                }
+              ],
+              "status": "advisory",
+              "suggested_next_steps": [
+                "publish available capacity to qualified users",
+                "match overflow demand from equivalent instruments",
+                "compare borrow / extend staffed hours / buy before any purchase"
+              ],
+              "caveat": "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            },
+            "units": "share of staffed hours",
+            "required_approvals": [
+              "dept_admin"
+            ],
+            "assumptions": [
+              "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            ],
+            "state": "detected"
+          },
+          {
+            "insight_id": "ins_underuse_sequencer_1_20261102",
+            "kind": "underuse",
+            "input_snapshot_id": "snap_8dcbc982d756e141",
+            "week_start": "2026-11-02",
+            "candidate_ids": [
+              "sequencer_1"
+            ],
+            "lab_ids": [],
+            "estimate": {
+              "resource_id": "sequencer_1",
+              "utilization": 0.225,
+              "booked_hours": 9.0,
+              "available_hours": 40.0,
+              "history": [
+                {
+                  "week_start": "2026-09-21",
+                  "booked_hours": 10.0,
+                  "requested_hours": 10.0,
+                  "utilization": 0.25
+                },
+                {
+                  "week_start": "2026-09-28",
+                  "booked_hours": 8.0,
+                  "requested_hours": 10.0,
+                  "utilization": 0.2
+                },
+                {
+                  "week_start": "2026-10-05",
+                  "booked_hours": 8.0,
+                  "requested_hours": 9.0,
+                  "utilization": 0.2
+                },
+                {
+                  "week_start": "2026-10-12",
+                  "booked_hours": 11.0,
+                  "requested_hours": 11.0,
+                  "utilization": 0.275
+                },
+                {
+                  "week_start": "2026-10-19",
+                  "booked_hours": 7.0,
+                  "requested_hours": 7.0,
+                  "utilization": 0.175
+                },
+                {
+                  "week_start": "2026-10-26",
+                  "booked_hours": 7.0,
+                  "requested_hours": 9.0,
+                  "utilization": 0.175
+                }
+              ],
+              "low_weeks": 4,
+              "weeks_observed": 6,
+              "persistent": true,
+              "overflow_sources": [],
+              "status": "advisory",
+              "suggested_next_steps": [
+                "publish available capacity to qualified users",
+                "match overflow demand from equivalent instruments",
+                "compare borrow / extend staffed hours / buy before any purchase"
+              ],
+              "caveat": "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            },
+            "units": "share of staffed hours",
+            "required_approvals": [
+              "dept_admin"
+            ],
+            "assumptions": [
+              "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            ],
+            "state": "detected"
+          }
+        ],
+        "snapshot_id": "snap_8dcbc982d756e141",
+        "source_record_ids": [
+          "confocal_2",
+          "flow_2",
+          "sequencer_1"
+        ],
+        "assumptions": [],
+        "warnings": []
+      }
+    },
+    "output": {
+      "snapshotId": "snap_8dcbc982d756e141",
+      "weekStart": "2026-11-02",
+      "dataTimestamp": "2026-10-28T10:00:57-05:00",
+      "cards": [
+        {
+          "insightId": "ins_pool_anti_gfp_100_moreno_patel",
+          "kind": "pooled_order",
+          "headline": "Combine the Moreno and Patel anti-GFP orders",
+          "evidenceSentence": "Moreno (2 packs) and Patel (3 packs) have open orders for the same antibody from the same vendor, shipping to the same dock.",
+          "summary": "Ordering 5 packs together reaches the $105 volume price and needs one $20 shipping charge: separately 2x120+20 + 3x120+20 = $640; pooled 5x105+20 = $545. That is a potential $95 ($75 volume + $20 shipping), not realized. Each lab keeps its own cost allocation; no grant money moves.",
+          "impact": {
+            "value": 95,
+            "unit": "USD",
+            "status": "potential",
+            "label": "$95 potential savings (estimated)"
+          },
+          "evidenceIds": [
+            "ins_pool_anti_gfp_100_moreno_patel",
+            "po_0023",
+            "po_patel_antigfp"
+          ],
+          "assumptions": [
+            "synthetic vendor tier",
+            "single pooled shipping destination",
+            "separate cost allocation per lab; no grant money moves",
+            "finance policy approval required",
+            "synthetic vendor prices"
+          ],
+          "confidence": "high",
+          "limitations": [
+            "Prices are synthetic vendor tiers, not quotes.",
+            "Both lab managers and the department admin must agree before any order changes."
+          ],
+          "exclusions": [
+            {
+              "ids": [
+                "po_rivera_dapi"
+              ],
+              "reason": "DAPI order is already approved and can't be changed (STATE_LOCKED)"
+            },
+            {
+              "ids": [
+                "po_patel_tips",
+                "po_rivera_tips"
+              ],
+              "reason": "Pipette tip orders ship to different locations (DIFFERENT_SHIP_TO)"
+            }
+          ],
+          "requiredApprovals": [
+            "moreno_mgr",
+            "patel_mgr",
+            "dept_admin"
+          ],
+          "nextStep": {
+            "action": "propose_shared_order",
+            "label": "Propose shared order"
+          },
+          "advisory": false
+        },
+        {
+          "insightId": "ins_overload_confocal_1_confocal_2_20261102",
+          "kind": "overload_rebalance",
+          "headline": "Move 8 flexible hours from Confocal-1 to Confocal-2",
+          "evidenceSentence": "Confocal-1 is booked 37 hours (92.5% of staffed time) next week while Confocal-2 has 8 hours (20%).",
+          "summary": "Two flexible 4-hour sessions (Wed and Thu 09:00-13:00) belong to people certified on Confocal-2 and fit there with cleaning buffers. Moving them gives 29 h (72.5%) and 16 h (40%); total workload stays 45 h. Chen's Tuesday session is excluded because Chen is not certified on Confocal-2. Nothing moves until each owner agrees.",
+          "impact": {
+            "value": 8.0,
+            "unit": "hours",
+            "status": "potential",
+            "label": "8 hours of potential congestion relief"
+          },
+          "evidenceIds": [
+            "ins_overload_confocal_1_confocal_2_20261102",
+            "bk_confocal_1_20261104_0900",
+            "bk_confocal_1_20261105_0900"
+          ],
+          "assumptions": [
+            "same session times on the equivalent instrument",
+            "owner approval required per booking"
+          ],
+          "confidence": "medium",
+          "limitations": [
+            "Each booking owner (riley_rivera, sam_chen) must consent; the admin can't approve for them.",
+            "Hours, not money: this card has no dollar value.",
+            "Baseline forecast for Confocal-1 next week: 38 h (33-43), MAE 3.3; weighted average, not ML."
+          ],
+          "exclusions": [
+            {
+              "ids": [
+                "bk_chen_confocal"
+              ],
+              "reason": "Owner is not certified on Confocal-2 (NOT_QUALIFIED)"
+            }
+          ],
+          "requiredApprovals": [
+            "riley_rivera",
+            "sam_chen",
+            "dept_admin"
+          ],
+          "nextStep": {
+            "action": "review_transfer_plan",
+            "label": "Review transfer plan"
+          },
+          "advisory": false
+        },
+        {
+          "insightId": "ins_underuse_flow_2_20261102",
+          "kind": "underuse",
+          "headline": "Flow Cytometer 2 is used 10% of staffed hours",
+          "evidenceSentence": "4 of 40 staffed hours are booked next week, and use stayed between 10% and 17.5% in all 6 observed weeks.",
+          "summary": "Flow Cytometer 1 runs at 75% with about 4 unmet hours a week that Flow Cytometer 2 could absorb for qualified users. Publish the spare capacity first; compare borrowing, longer staffed hours or buying only if demand grows. Low use does not mean the instrument is obsolete.",
+          "impact": {
+            "value": 10.0,
+            "unit": "percent_of_staffed_hours",
+            "status": "potential",
+            "label": "10% of staffed hours used (estimated)"
+          },
+          "evidenceIds": [
+            "ins_underuse_flow_2_20261102",
+            "flow_2"
+          ],
+          "assumptions": [
+            "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+          ],
+          "confidence": "medium",
+          "limitations": [
+            "Advisory: based on six weeks of synthetic history.",
+            "No sale or purchase is implied."
+          ],
+          "exclusions": [],
+          "requiredApprovals": [
+            "dept_admin"
+          ],
+          "nextStep": {
+            "action": "publish_available_capacity",
+            "label": "Publish available capacity"
+          },
+          "advisory": true
+        }
+      ],
+      "alsoDetected": [
+        {
+          "insightId": "ins_underuse_confocal_2_20261102",
+          "note": "Confocal-2 is also low (20%); the overload card moves Confocal-1 hours onto it."
+        },
+        {
+          "insightId": "ins_underuse_sequencer_1_20261102",
+          "note": "Benchtop Sequencer is low (22.5%) with no matched overflow demand; watch, no action yet."
+        }
+      ],
+      "notes": [
+        "All bookings, prices and forecasts are synthetic demo data."
+      ]
+    }
+  },
+  {
+    "id": "opt-before-stage-1",
+    "description": "Fresh seed: only Patel orders anti-GFP, so there is no pooling card yet.",
+    "context": {
+      "actor_id": "dept_admin",
+      "lab_id": null,
+      "now": "2026-10-28T10:00:00-05:00",
+      "week_start": "2026-11-02"
+    },
+    "input": {
+      "snapshot": {
+        "status": "ok",
+        "data_timestamp": "2026-10-28T10:00:01-05:00",
+        "snapshot_id": "snap_7f653272c80fe7e6",
+        "week_start": "2026-11-02",
+        "utilization": [
+          {
+            "resource_id": "confocal_1",
+            "booked_hours": 34.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.85
+          },
+          {
+            "resource_id": "confocal_2",
+            "booked_hours": 8.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.2
+          },
+          {
+            "resource_id": "flow_1",
+            "booked_hours": 30.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.75
+          },
+          {
+            "resource_id": "flow_2",
+            "booked_hours": 4.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.1
+          },
+          {
+            "resource_id": "pcr_1",
+            "booked_hours": 18.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.45
+          },
+          {
+            "resource_id": "pcr_2",
+            "booked_hours": 10.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.25
+          },
+          {
+            "resource_id": "centrifuge_1",
+            "booked_hours": 12.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.3
+          },
+          {
+            "resource_id": "plate_reader_1",
+            "booked_hours": 14.0,
+            "available_hours": 36.0,
+            "maintenance_hours": 4.0,
+            "utilization": 0.3889
+          },
+          {
+            "resource_id": "sequencer_1",
+            "booked_hours": 9.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.225
+          },
+          {
+            "resource_id": "microscope_wide_1",
+            "booked_hours": 11.0,
+            "available_hours": 40.0,
+            "maintenance_hours": 0.0,
+            "utilization": 0.275
+          }
+        ],
+        "open_proposals": {},
+        "open_orders": [
+          {
+            "order_id": "po_patel_antigfp",
+            "sku_id": "ANTI_GFP_100",
+            "lab_id": "lab_patel",
+            "quantity": 3,
+            "state": "awaiting_lab_approval"
+          },
+          {
+            "order_id": "po_patel_tips",
+            "sku_id": "TIPS_200",
+            "lab_id": "lab_patel",
+            "quantity": 4,
+            "state": "awaiting_fund_approval"
+          },
+          {
+            "order_id": "po_rivera_tips",
+            "sku_id": "TIPS_200",
+            "lab_id": "lab_rivera",
+            "quantity": 6,
+            "state": "awaiting_lab_approval"
+          },
+          {
+            "order_id": "po_chen_dapi",
+            "sku_id": "DAPI_1ML",
+            "lab_id": "lab_chen",
+            "quantity": 1,
+            "state": "awaiting_lab_approval"
+          },
+          {
+            "order_id": "po_rivera_dapi",
+            "sku_id": "DAPI_1ML",
+            "lab_id": "lab_rivera",
+            "quantity": 1,
+            "state": "approved_request"
+          },
+          {
+            "order_id": "po_rivera_dnakit",
+            "sku_id": "DNA_KIT",
+            "lab_id": "lab_rivera",
+            "quantity": 2,
+            "state": "awaiting_fund_approval"
+          },
+          {
+            "order_id": "po_rivera_plates",
+            "sku_id": "PCR_PLATES",
+            "lab_id": "lab_rivera",
+            "quantity": 3,
+            "state": "approved_request"
+          }
+        ],
+        "restricted_signals_count": 1,
+        "source_record_ids": [
+          "centrifuge_1",
+          "confocal_1",
+          "confocal_2",
+          "flow_1",
+          "flow_2",
+          "microscope_wide_1",
+          "pcr_1",
+          "pcr_2",
+          "plate_reader_1",
+          "po_chen_dapi",
+          "po_patel_antigfp",
+          "po_patel_tips",
+          "po_rivera_dapi",
+          "po_rivera_dnakit",
+          "po_rivera_plates",
+          "po_rivera_tips",
+          "sequencer_1"
+        ],
+        "assumptions": [],
+        "warnings": []
+      },
+      "pooled": {
+        "status": "ok",
+        "data_timestamp": "2026-10-28T10:00:02-05:00",
+        "insights": [],
+        "exclusions": [
+          {
+            "sku_id": "DAPI_1ML",
+            "order_ids": [
+              "po_rivera_dapi"
+            ],
+            "reason": "STATE_LOCKED"
+          },
+          {
+            "sku_id": "TIPS_200",
+            "order_ids": [
+              "po_patel_tips",
+              "po_rivera_tips"
+            ],
+            "reason": "DIFFERENT_SHIP_TO"
+          }
+        ],
+        "snapshot_id": "snap_7f653272c80fe7e6",
+        "source_record_ids": [],
+        "assumptions": [],
+        "warnings": []
+      },
+      "overloads": {
+        "status": "ok",
+        "data_timestamp": "2026-10-28T10:00:03-05:00",
+        "insights": [
+          {
+            "insight_id": "ins_overload_confocal_1_confocal_2_20261102",
+            "kind": "overload_rebalance",
+            "input_snapshot_id": "snap_7f653272c80fe7e6",
+            "week_start": "2026-11-02",
+            "candidate_ids": [
+              "bk_confocal_1_20261104_0900",
+              "bk_confocal_1_20261105_0900"
+            ],
+            "lab_ids": [
+              "lab_chen",
+              "lab_rivera"
+            ],
+            "estimate": {
+              "source": "confocal_1",
+              "target": "confocal_2",
+              "movable_hours": 8.0,
+              "before": {
+                "source_hours": 34.0,
+                "target_hours": 8.0,
+                "source_utilization": 0.85,
+                "target_utilization": 0.2
+              },
+              "after": {
+                "source_hours": 26.0,
+                "target_hours": 16.0,
+                "source_utilization": 0.65,
+                "target_utilization": 0.4
+              },
+              "total_hours_before": 42.0,
+              "total_hours_after": 42.0,
+              "moves": [
+                {
+                  "booking_id": "bk_confocal_1_20261104_0900",
+                  "owner_id": "riley_rivera",
+                  "lab_id": "lab_rivera",
+                  "hours": 4.0,
+                  "start": "2026-11-04T09:00:00-06:00",
+                  "end": "2026-11-04T13:00:00-06:00",
+                  "from_resource": "confocal_1",
+                  "to_resource": "confocal_2"
+                },
+                {
+                  "booking_id": "bk_confocal_1_20261105_0900",
+                  "owner_id": "sam_chen",
+                  "lab_id": "lab_chen",
+                  "hours": 4.0,
+                  "start": "2026-11-05T09:00:00-06:00",
+                  "end": "2026-11-05T13:00:00-06:00",
+                  "from_resource": "confocal_1",
+                  "to_resource": "confocal_2"
+                }
+              ],
+              "excluded": [
+                {
+                  "booking_id": "bk_chen_confocal",
+                  "reason": "NOT_QUALIFIED",
+                  "missing": [
+                    "confocal_2_cert"
+                  ]
+                }
+              ],
+              "required_approvals": [
+                "riley_rivera",
+                "sam_chen"
+              ],
+              "reason": null,
+              "value_unit": "hours of congestion relieved (not money)"
+            },
+            "units": "hours of congestion relieved (not money)",
+            "required_approvals": [
+              "riley_rivera",
+              "sam_chen",
+              "dept_admin"
+            ],
+            "assumptions": [
+              "same session times on the equivalent instrument",
+              "owner approval required per booking"
+            ],
+            "state": "detected"
+          }
+        ],
+        "snapshot_id": "snap_7f653272c80fe7e6",
+        "source_record_ids": [
+          "bk_confocal_1_20261104_0900",
+          "bk_confocal_1_20261105_0900"
+        ],
+        "assumptions": [],
+        "warnings": []
+      },
+      "underuse": {
+        "status": "ok",
+        "data_timestamp": "2026-10-28T10:00:04-05:00",
+        "insights": [
+          {
+            "insight_id": "ins_underuse_flow_2_20261102",
+            "kind": "underuse",
+            "input_snapshot_id": "snap_7f653272c80fe7e6",
+            "week_start": "2026-11-02",
+            "candidate_ids": [
+              "flow_2"
+            ],
+            "lab_ids": [],
+            "estimate": {
+              "resource_id": "flow_2",
+              "utilization": 0.1,
+              "booked_hours": 4.0,
+              "available_hours": 40.0,
+              "history": [
+                {
+                  "week_start": "2026-09-21",
+                  "booked_hours": 6.0,
+                  "requested_hours": 6.0,
+                  "utilization": 0.15
+                },
+                {
+                  "week_start": "2026-09-28",
+                  "booked_hours": 5.0,
+                  "requested_hours": 5.0,
+                  "utilization": 0.125
+                },
+                {
+                  "week_start": "2026-10-05",
+                  "booked_hours": 7.0,
+                  "requested_hours": 7.0,
+                  "utilization": 0.175
+                },
+                {
+                  "week_start": "2026-10-12",
+                  "booked_hours": 4.0,
+                  "requested_hours": 4.0,
+                  "utilization": 0.1
+                },
+                {
+                  "week_start": "2026-10-19",
+                  "booked_hours": 6.0,
+                  "requested_hours": 6.0,
+                  "utilization": 0.15
+                },
+                {
+                  "week_start": "2026-10-26",
+                  "booked_hours": 5.0,
+                  "requested_hours": 5.0,
+                  "utilization": 0.125
+                }
+              ],
+              "low_weeks": 6,
+              "weeks_observed": 6,
+              "persistent": true,
+              "overflow_sources": [
+                {
+                  "resource_id": "flow_1",
+                  "avg_unmet_hours_per_week": 4.0,
+                  "utilization": 0.75
+                }
+              ],
+              "status": "advisory",
+              "suggested_next_steps": [
+                "publish available capacity to qualified users",
+                "match overflow demand from equivalent instruments",
+                "compare borrow / extend staffed hours / buy before any purchase"
+              ],
+              "caveat": "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            },
+            "units": "share of staffed hours",
+            "required_approvals": [
+              "dept_admin"
+            ],
+            "assumptions": [
+              "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            ],
+            "state": "detected"
+          },
+          {
+            "insight_id": "ins_underuse_confocal_2_20261102",
+            "kind": "underuse",
+            "input_snapshot_id": "snap_7f653272c80fe7e6",
+            "week_start": "2026-11-02",
+            "candidate_ids": [
+              "confocal_2"
+            ],
+            "lab_ids": [],
+            "estimate": {
+              "resource_id": "confocal_2",
+              "utilization": 0.2,
+              "booked_hours": 8.0,
+              "available_hours": 40.0,
+              "history": [
+                {
+                  "week_start": "2026-09-21",
+                  "booked_hours": 7.0,
+                  "requested_hours": 7.0,
+                  "utilization": 0.175
+                },
+                {
+                  "week_start": "2026-09-28",
+                  "booked_hours": 10.0,
+                  "requested_hours": 11.0,
+                  "utilization": 0.25
+                },
+                {
+                  "week_start": "2026-10-05",
+                  "booked_hours": 8.0,
+                  "requested_hours": 8.0,
+                  "utilization": 0.2
+                },
+                {
+                  "week_start": "2026-10-12",
+                  "booked_hours": 9.0,
+                  "requested_hours": 10.0,
+                  "utilization": 0.225
+                },
+                {
+                  "week_start": "2026-10-19",
+                  "booked_hours": 6.0,
+                  "requested_hours": 6.0,
+                  "utilization": 0.15
+                },
+                {
+                  "week_start": "2026-10-26",
+                  "booked_hours": 8.0,
+                  "requested_hours": 8.0,
+                  "utilization": 0.2
+                }
+              ],
+              "low_weeks": 5,
+              "weeks_observed": 6,
+              "persistent": true,
+              "overflow_sources": [
+                {
+                  "resource_id": "confocal_1",
+                  "avg_unmet_hours_per_week": 4.0,
+                  "utilization": 0.85
+                }
+              ],
+              "status": "advisory",
+              "suggested_next_steps": [
+                "publish available capacity to qualified users",
+                "match overflow demand from equivalent instruments",
+                "compare borrow / extend staffed hours / buy before any purchase"
+              ],
+              "caveat": "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            },
+            "units": "share of staffed hours",
+            "required_approvals": [
+              "dept_admin"
+            ],
+            "assumptions": [
+              "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            ],
+            "state": "detected"
+          },
+          {
+            "insight_id": "ins_underuse_sequencer_1_20261102",
+            "kind": "underuse",
+            "input_snapshot_id": "snap_7f653272c80fe7e6",
+            "week_start": "2026-11-02",
+            "candidate_ids": [
+              "sequencer_1"
+            ],
+            "lab_ids": [],
+            "estimate": {
+              "resource_id": "sequencer_1",
+              "utilization": 0.225,
+              "booked_hours": 9.0,
+              "available_hours": 40.0,
+              "history": [
+                {
+                  "week_start": "2026-09-21",
+                  "booked_hours": 10.0,
+                  "requested_hours": 10.0,
+                  "utilization": 0.25
+                },
+                {
+                  "week_start": "2026-09-28",
+                  "booked_hours": 8.0,
+                  "requested_hours": 10.0,
+                  "utilization": 0.2
+                },
+                {
+                  "week_start": "2026-10-05",
+                  "booked_hours": 8.0,
+                  "requested_hours": 9.0,
+                  "utilization": 0.2
+                },
+                {
+                  "week_start": "2026-10-12",
+                  "booked_hours": 11.0,
+                  "requested_hours": 11.0,
+                  "utilization": 0.275
+                },
+                {
+                  "week_start": "2026-10-19",
+                  "booked_hours": 7.0,
+                  "requested_hours": 7.0,
+                  "utilization": 0.175
+                },
+                {
+                  "week_start": "2026-10-26",
+                  "booked_hours": 7.0,
+                  "requested_hours": 9.0,
+                  "utilization": 0.175
+                }
+              ],
+              "low_weeks": 4,
+              "weeks_observed": 6,
+              "persistent": true,
+              "overflow_sources": [],
+              "status": "advisory",
+              "suggested_next_steps": [
+                "publish available capacity to qualified users",
+                "match overflow demand from equivalent instruments",
+                "compare borrow / extend staffed hours / buy before any purchase"
+              ],
+              "caveat": "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            },
+            "units": "share of staffed hours",
+            "required_approvals": [
+              "dept_admin"
+            ],
+            "assumptions": [
+              "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+            ],
+            "state": "detected"
+          }
+        ],
+        "snapshot_id": "snap_7f653272c80fe7e6",
+        "source_record_ids": [
+          "confocal_2",
+          "flow_2",
+          "sequencer_1"
+        ],
+        "assumptions": [],
+        "warnings": []
+      }
+    },
+    "output": {
+      "snapshotId": "snap_7f653272c80fe7e6",
+      "weekStart": "2026-11-02",
+      "dataTimestamp": "2026-10-28T10:00:01-05:00",
+      "cards": [
+        {
+          "insightId": "ins_overload_confocal_1_confocal_2_20261102",
+          "kind": "overload_rebalance",
+          "headline": "Move 8 flexible hours from Confocal-1 to Confocal-2",
+          "evidenceSentence": "Confocal-1 is booked 34 hours (85% of staffed time) next week while Confocal-2 has 8 hours (20%).",
+          "summary": "Two flexible 4-hour sessions (Wed and Thu 09:00-13:00) belong to people certified on Confocal-2 and fit there with cleaning buffers. Moving them gives 26 h (65%) and 16 h (40%); total workload stays 42 h. Chen's Tuesday session is excluded because Chen is not certified on Confocal-2. Nothing moves until each owner agrees.",
+          "impact": {
+            "value": 8.0,
+            "unit": "hours",
+            "status": "potential",
+            "label": "8 hours of potential congestion relief"
+          },
+          "evidenceIds": [
+            "ins_overload_confocal_1_confocal_2_20261102",
+            "bk_confocal_1_20261104_0900",
+            "bk_confocal_1_20261105_0900"
+          ],
+          "assumptions": [
+            "same session times on the equivalent instrument",
+            "owner approval required per booking"
+          ],
+          "confidence": "medium",
+          "limitations": [
+            "Each booking owner (riley_rivera, sam_chen) must consent; the admin can't approve for them.",
+            "Hours, not money: this card has no dollar value."
+          ],
+          "exclusions": [
+            {
+              "ids": [
+                "bk_chen_confocal"
+              ],
+              "reason": "Owner is not certified on Confocal-2 (NOT_QUALIFIED)"
+            }
+          ],
+          "requiredApprovals": [
+            "riley_rivera",
+            "sam_chen",
+            "dept_admin"
+          ],
+          "nextStep": {
+            "action": "review_transfer_plan",
+            "label": "Review transfer plan"
+          },
+          "advisory": false
+        },
+        {
+          "insightId": "ins_underuse_flow_2_20261102",
+          "kind": "underuse",
+          "headline": "Flow Cytometer 2 is used 10% of staffed hours",
+          "evidenceSentence": "4 of 40 staffed hours are booked next week, and use stayed between 10% and 17.5% in all 6 observed weeks.",
+          "summary": "Flow Cytometer 1 runs at 75% with about 4 unmet hours a week that Flow Cytometer 2 could absorb for qualified users. Publish the spare capacity first; compare borrowing, longer staffed hours or buying only if demand grows. Low use does not mean the instrument is obsolete.",
+          "impact": {
+            "value": 10.0,
+            "unit": "percent_of_staffed_hours",
+            "status": "potential",
+            "label": "10% of staffed hours used (estimated)"
+          },
+          "evidenceIds": [
+            "ins_underuse_flow_2_20261102",
+            "flow_2"
+          ],
+          "assumptions": [
+            "Low use does not mean the instrument is obsolete; no sale or purchase is implied."
+          ],
+          "confidence": "medium",
+          "limitations": [
+            "Advisory: based on six weeks of synthetic history.",
+            "No sale or purchase is implied."
+          ],
+          "exclusions": [],
+          "requiredApprovals": [
+            "dept_admin"
+          ],
+          "nextStep": {
+            "action": "publish_available_capacity",
+            "label": "Publish available capacity"
+          },
+          "advisory": true
+        }
+      ],
+      "alsoDetected": [
+        {
+          "insightId": "ins_underuse_confocal_2_20261102",
+          "note": "Confocal-2 is also low (20%); the overload card moves Confocal-1 hours onto it."
+        },
+        {
+          "insightId": "ins_underuse_sequencer_1_20261102",
+          "note": "Benchtop Sequencer is low (22.5%) with no matched overflow demand; watch, no action yet."
+        }
+      ],
+      "notes": [
+        "No pooling opportunity yet: no two labs have compatible open orders for the same SKU.",
+        "All bookings, prices and forecasts are synthetic demo data."
+      ]
+    }
+  },
+  {
+    "id": "opt-permission-denied",
+    "description": "A lab researcher asks for department insights: tools deny, no data shown.",
+    "context": {
+      "actor_id": "morgan",
+      "lab_id": "lab_moreno",
+      "now": "2026-10-28T10:00:00-05:00",
+      "week_start": "2026-11-02"
+    },
+    "input": {
+      "snapshot": {
+        "status": "error",
+        "code": "PERMISSION_DENIED",
+        "message": "You are not authorized for this action."
+      }
+    },
+    "output": {
+      "snapshotId": "none",
+      "weekStart": "2026-11-02",
+      "dataTimestamp": "2026-10-28T10:00:00-05:00",
+      "cards": [],
+      "alsoDetected": [],
+      "notes": [
+        "Department insights are restricted to department admins; nothing was retrieved."
+      ]
+    }
+  }
+]
