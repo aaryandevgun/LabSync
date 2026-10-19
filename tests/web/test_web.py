@@ -69,6 +69,7 @@ def test_session_labels_local_synthetic_mode(server):
     assert s["c3_connected"] is False and s["synthetic"] is True and s["mode"] == "mock"
     assert s["persona"]["id"] == "morgan" and not s["is_admin"]
     assert {"morgan", "chen_owner", "dept_admin"} <= {p["id"] for p in s["personas"]}
+    assert s["resource_names"]["flow_2"] == "Flow Cytometer 2" and s["resource_names"]["prep_a"] == "Prep Room A"
     status, err, _ = call(base, "GET", "/api/session", who="nobody")
     assert status == 400 and err["code"] == "UNKNOWN_PERSONA"
 
