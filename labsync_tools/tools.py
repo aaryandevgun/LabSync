@@ -23,7 +23,7 @@ from labsync_core.proposals import (HELD_STATES, approval_status, authorize_deci
 from labsync_core.slots import find_slots
 from labsync_core.supplies import check_stock, quote, supply_readiness
 from labsync_core.utilization import find_utilization_gaps, weekly_utilization
-from labsync_core.values import as_list, as_num, iso, to_dt
+from labsync_core.values import as_bool, as_list, as_num, iso, to_dt
 
 from . import approvals as approval_store
 from . import audit
@@ -472,8 +472,11 @@ def _owner_impact(repo, proposal, move):
     return {"booking_id": move["booking_id"], "resource_id": move["resource_id"], "from": move["from"],
             "to": move["to"], "same_duration": duration_same, "same_day": to_dt(move["to"]["start"]).date() == day,
             "requested_by_lab": requester_lab["name"] if requester_lab else proposal["lab_id"],
+            "booked_by": repo.get_record("Booking", move["booking_id"])["user_id"],
+            "flexible": as_bool(repo.get_record("Booking", move["booking_id"]).get("flexible")),
             "your_other_bookings_that_day": [{"booking_id": b["booking_id"], "resource_id": b["resource_id"],
-                                              "start": b["start_local"], "end": b["end_local"]} for b in own]}
+                                              "user_id": b["user_id"], "start": b["start_local"],
+                                              "end": b["end_local"]} for b in own]}
 
 
 def liaison_request_change(repo, actor_id, proposal_id, booking_id, message=None):
@@ -816,7 +819,8 @@ def _underuse_insights(repo, week_start):
         "kind": "underuse", "input_snapshot_id": snap, "week_start": week_start,
         "candidate_ids": [u["resource_id"]], "lab_ids": [], "estimate": u, "units": "share of staffed hours",
         "required_approvals": ["dept_admin"], "assumptions": [u["caveat"]]}
-        for u in _gaps(repo, week_start)["underused"] if u["persistent"]]
+        for u in sorted(_gaps(repo, week_start)["underused"], key=lambda u: (u["utilization"], u["resource_id"]))
+        if u["persistent"]]
 
 
 def _with_state(repo, insight):
@@ -864,7 +868,7 @@ def insight_find_overloads(repo, actor_id, week_start):
 
 def insight_find_underuse(repo, actor_id, week_start):
     """Detect persistently underused instruments and matching overflow demand. Admin only. Read only.
-    Advisory: never recommends selling or buying from one week of data.
+    Advisory: never recommends selling or buying from one week of data. Ranked lowest utilization first.
 
     Args:
         actor_id (str), week_start (str): Monday, e.g. "2026-11-02".

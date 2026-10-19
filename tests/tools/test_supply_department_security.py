@@ -80,7 +80,9 @@ def test_overload_and_underuse_insights(repo, goal):
     assert est["movable_hours"] == 8.0
     assert (est["after"]["source_hours"], est["after"]["target_hours"]) == (29.0, 16.0)
     assert over[0]["candidate_ids"] and over[0]["units"].startswith("hours")
-    under = {i["candidate_ids"][0]: i for i in ok(T.insight_find_underuse(repo, "dept_admin", WEEK))["insights"]}
+    ranked = ok(T.insight_find_underuse(repo, "dept_admin", WEEK))["insights"]
+    assert ranked[0]["candidate_ids"] == ["flow_2"]  # lowest utilization first
+    under = {i["candidate_ids"][0]: i for i in ranked}
     flow2 = under["flow_2"]["estimate"]
     assert flow2["utilization"] == 0.1 and len(flow2["history"]) == 6
     assert "USD" not in under["flow_2"]["units"]

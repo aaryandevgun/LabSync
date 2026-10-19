@@ -92,6 +92,7 @@ def test_owner_move_request_hidden_until_sent_and_ordered(repo, goal):
     assert inbox[0]["impact"]["to"]["start"] == "2026-11-03T13:30:00-06:00"
     assert ok(Q.list_notifications(repo, "chen_owner"))["notifications"][0]["channel"] == "in_app"
     assert sent["owner_id"] == "chen_owner"
+    assert (sent["impact"]["booked_by"], sent["impact"]["flexible"]) == ("chen_owner", True)
     # Impact shown to Chen lists only Chen's own lab bookings.
     labs = {repo.get_record("Booking", b["booking_id"])["lab_id"] for b in sent["impact"]["your_other_bookings_that_day"]}
     assert labs <= {"lab_chen"}
