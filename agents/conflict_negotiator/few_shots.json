@@ -1,0 +1,397 @@
+[
+  {
+    "id": "neg-canonical-approve",
+    "description": "Canonical Chen move (real tool output): flexible, same day, same length, no personal conflict.",
+    "context": {
+      "actor_id": "chen_owner",
+      "lab_id": "lab_chen",
+      "now": "2026-10-28T10:00:00-05:00"
+    },
+    "input": {
+      "status": "ok",
+      "data_timestamp": "2026-10-28T10:00:24-05:00",
+      "approval_id": "appr_0007",
+      "state": "pending",
+      "impact": {
+        "booking_id": "bk_chen_confocal",
+        "resource_id": "confocal_1",
+        "from": {
+          "start": "2026-11-03T10:00:00-06:00",
+          "end": "2026-11-03T12:00:00-06:00"
+        },
+        "to": {
+          "start": "2026-11-03T13:30:00-06:00",
+          "end": "2026-11-03T15:30:00-06:00"
+        },
+        "same_duration": true,
+        "same_day": true,
+        "requested_by_lab": "Moreno Cell Biology",
+        "booked_by": "chen_owner",
+        "flexible": true,
+        "person_conflicts": [],
+        "your_other_bookings_that_day": [
+          {
+            "booking_id": "bk_confocal_1_20261103_0900",
+            "resource_id": "confocal_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T09:00:00-06:00",
+            "end": "2026-11-03T09:45:00-06:00"
+          },
+          {
+            "booking_id": "bk_plate_reader_1_20261103_1030",
+            "resource_id": "plate_reader_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T10:30:00-06:00",
+            "end": "2026-11-03T14:00:00-06:00"
+          },
+          {
+            "booking_id": "bk_microscope_wide_1_20261103_1200",
+            "resource_id": "microscope_wide_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T12:00:00-06:00",
+            "end": "2026-11-03T14:30:00-06:00"
+          }
+        ]
+      },
+      "message": null,
+      "source_record_ids": [
+        "appr_0007",
+        "bk_chen_confocal"
+      ],
+      "assumptions": [],
+      "warnings": []
+    },
+    "output": {
+      "approvalId": "appr_0007",
+      "bookingId": "bk_chen_confocal",
+      "recommendation": "approve",
+      "from": {
+        "start": "2026-11-03T10:00:00-06:00",
+        "end": "2026-11-03T12:00:00-06:00"
+      },
+      "to": {
+        "start": "2026-11-03T13:30:00-06:00",
+        "end": "2026-11-03T15:30:00-06:00"
+      },
+      "reasons": [
+        "You marked this Confocal-1 session flexible.",
+        "It moves later the same day (13:30-15:30) and keeps its 2-hour length.",
+        "You have no other session of your own at that time; Sam's plate-reader and widefield bookings are unaffected."
+      ],
+      "ownerImpact": {
+        "sameDay": true,
+        "sameDuration": true,
+        "personConflicts": []
+      },
+      "alternatives": [],
+      "evidenceIds": [
+        "appr_0007",
+        "bk_chen_confocal",
+        "bk_plate_reader_1_20261103_1030",
+        "bk_microscope_wide_1_20261103_1200"
+      ],
+      "dataTimestamp": "2026-10-28T10:00:24-05:00",
+      "decidedBy": "owner"
+    }
+  },
+  {
+    "id": "neg-person-conflict",
+    "description": "Hypothetical: the new time overlaps the owner's own 14:00-15:00 plate-reader session.",
+    "context": {
+      "actor_id": "chen_owner",
+      "lab_id": "lab_chen",
+      "now": "2026-10-28T10:00:00-05:00"
+    },
+    "input": {
+      "status": "ok",
+      "data_timestamp": "2026-10-28T10:00:24-05:00",
+      "approval_id": "appr_example_2",
+      "state": "pending",
+      "impact": {
+        "booking_id": "bk_chen_confocal",
+        "resource_id": "confocal_1",
+        "from": {
+          "start": "2026-11-03T10:00:00-06:00",
+          "end": "2026-11-03T12:00:00-06:00"
+        },
+        "to": {
+          "start": "2026-11-03T13:30:00-06:00",
+          "end": "2026-11-03T15:30:00-06:00"
+        },
+        "same_duration": true,
+        "same_day": true,
+        "requested_by_lab": "Moreno Cell Biology",
+        "booked_by": "chen_owner",
+        "flexible": true,
+        "person_conflicts": [
+          "bk_chen_plate_1400"
+        ],
+        "your_other_bookings_that_day": [
+          {
+            "booking_id": "bk_confocal_1_20261103_0900",
+            "resource_id": "confocal_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T09:00:00-06:00",
+            "end": "2026-11-03T09:45:00-06:00"
+          },
+          {
+            "booking_id": "bk_plate_reader_1_20261103_1030",
+            "resource_id": "plate_reader_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T10:30:00-06:00",
+            "end": "2026-11-03T14:00:00-06:00"
+          },
+          {
+            "booking_id": "bk_microscope_wide_1_20261103_1200",
+            "resource_id": "microscope_wide_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T12:00:00-06:00",
+            "end": "2026-11-03T14:30:00-06:00"
+          },
+          {
+            "booking_id": "bk_chen_plate_1400",
+            "resource_id": "plate_reader_1",
+            "user_id": "chen_owner",
+            "start": "2026-11-03T14:00:00-06:00",
+            "end": "2026-11-03T15:00:00-06:00"
+          }
+        ]
+      },
+      "message": null,
+      "source_record_ids": [
+        "appr_example_2",
+        "bk_chen_confocal"
+      ],
+      "assumptions": [],
+      "warnings": []
+    },
+    "output": {
+      "approvalId": "appr_example_2",
+      "bookingId": "bk_chen_confocal",
+      "recommendation": "suggest_other_time",
+      "from": {
+        "start": "2026-11-03T10:00:00-06:00",
+        "end": "2026-11-03T12:00:00-06:00"
+      },
+      "to": {
+        "start": "2026-11-03T13:30:00-06:00",
+        "end": "2026-11-03T15:30:00-06:00"
+      },
+      "reasons": [
+        "13:30-15:30 overlaps your own plate-reader session 14:00-15:00 (bk_chen_plate_1400).",
+        "A 2-hour slot after 15:00 the same day would avoid it; the requester's scheduler must confirm it is free."
+      ],
+      "ownerImpact": {
+        "sameDay": true,
+        "sameDuration": true,
+        "personConflicts": [
+          "bk_chen_plate_1400"
+        ]
+      },
+      "alternatives": [
+        {
+          "earliestStart": "2026-11-03T15:00:00-06:00",
+          "latestEnd": "2026-11-03T17:00:00-06:00",
+          "note": "Same day, after your plate-reader session; unverified until re-searched"
+        }
+      ],
+      "evidenceIds": [
+        "appr_example_2",
+        "bk_chen_confocal",
+        "bk_chen_plate_1400"
+      ],
+      "dataTimestamp": "2026-10-28T10:00:24-05:00",
+      "decidedBy": "owner"
+    }
+  },
+  {
+    "id": "neg-not-flexible",
+    "description": "Hypothetical: the booking is not marked flexible.",
+    "context": {
+      "actor_id": "chen_owner",
+      "lab_id": "lab_chen",
+      "now": "2026-10-28T10:00:00-05:00"
+    },
+    "input": {
+      "status": "ok",
+      "data_timestamp": "2026-10-28T10:00:24-05:00",
+      "approval_id": "appr_example_3",
+      "state": "pending",
+      "impact": {
+        "booking_id": "bk_chen_confocal",
+        "resource_id": "confocal_1",
+        "from": {
+          "start": "2026-11-03T10:00:00-06:00",
+          "end": "2026-11-03T12:00:00-06:00"
+        },
+        "to": {
+          "start": "2026-11-03T13:30:00-06:00",
+          "end": "2026-11-03T15:30:00-06:00"
+        },
+        "same_duration": true,
+        "same_day": true,
+        "requested_by_lab": "Moreno Cell Biology",
+        "booked_by": "chen_owner",
+        "flexible": false,
+        "person_conflicts": [],
+        "your_other_bookings_that_day": [
+          {
+            "booking_id": "bk_confocal_1_20261103_0900",
+            "resource_id": "confocal_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T09:00:00-06:00",
+            "end": "2026-11-03T09:45:00-06:00"
+          },
+          {
+            "booking_id": "bk_plate_reader_1_20261103_1030",
+            "resource_id": "plate_reader_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T10:30:00-06:00",
+            "end": "2026-11-03T14:00:00-06:00"
+          },
+          {
+            "booking_id": "bk_microscope_wide_1_20261103_1200",
+            "resource_id": "microscope_wide_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T12:00:00-06:00",
+            "end": "2026-11-03T14:30:00-06:00"
+          }
+        ]
+      },
+      "message": null,
+      "source_record_ids": [
+        "appr_example_3",
+        "bk_chen_confocal"
+      ],
+      "assumptions": [],
+      "warnings": []
+    },
+    "output": {
+      "approvalId": "appr_example_3",
+      "bookingId": "bk_chen_confocal",
+      "recommendation": "reject",
+      "from": {
+        "start": "2026-11-03T10:00:00-06:00",
+        "end": "2026-11-03T12:00:00-06:00"
+      },
+      "to": {
+        "start": "2026-11-03T13:30:00-06:00",
+        "end": "2026-11-03T15:30:00-06:00"
+      },
+      "reasons": [
+        "This session is not marked flexible, so it is not available to move.",
+        "The requester can pick another option; your booking stays as it is."
+      ],
+      "ownerImpact": {
+        "sameDay": true,
+        "sameDuration": true,
+        "personConflicts": []
+      },
+      "alternatives": [],
+      "evidenceIds": [
+        "appr_example_3",
+        "bk_chen_confocal"
+      ],
+      "dataTimestamp": "2026-10-28T10:00:24-05:00",
+      "decidedBy": "owner"
+    }
+  },
+  {
+    "id": "neg-next-day",
+    "description": "Hypothetical: the move pushes the session to the next day.",
+    "context": {
+      "actor_id": "chen_owner",
+      "lab_id": "lab_chen",
+      "now": "2026-10-28T10:00:00-05:00"
+    },
+    "input": {
+      "status": "ok",
+      "data_timestamp": "2026-10-28T10:00:24-05:00",
+      "approval_id": "appr_example_4",
+      "state": "pending",
+      "impact": {
+        "booking_id": "bk_chen_confocal",
+        "resource_id": "confocal_1",
+        "from": {
+          "start": "2026-11-03T10:00:00-06:00",
+          "end": "2026-11-03T12:00:00-06:00"
+        },
+        "to": {
+          "start": "2026-11-04T10:00:00-06:00",
+          "end": "2026-11-04T12:00:00-06:00"
+        },
+        "same_duration": true,
+        "same_day": false,
+        "requested_by_lab": "Moreno Cell Biology",
+        "booked_by": "chen_owner",
+        "flexible": true,
+        "person_conflicts": [],
+        "your_other_bookings_that_day": [
+          {
+            "booking_id": "bk_confocal_1_20261103_0900",
+            "resource_id": "confocal_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T09:00:00-06:00",
+            "end": "2026-11-03T09:45:00-06:00"
+          },
+          {
+            "booking_id": "bk_plate_reader_1_20261103_1030",
+            "resource_id": "plate_reader_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T10:30:00-06:00",
+            "end": "2026-11-03T14:00:00-06:00"
+          },
+          {
+            "booking_id": "bk_microscope_wide_1_20261103_1200",
+            "resource_id": "microscope_wide_1",
+            "user_id": "sam_chen",
+            "start": "2026-11-03T12:00:00-06:00",
+            "end": "2026-11-03T14:30:00-06:00"
+          }
+        ]
+      },
+      "message": null,
+      "source_record_ids": [
+        "appr_example_4",
+        "bk_chen_confocal"
+      ],
+      "assumptions": [],
+      "warnings": []
+    },
+    "output": {
+      "approvalId": "appr_example_4",
+      "bookingId": "bk_chen_confocal",
+      "recommendation": "suggest_other_time",
+      "from": {
+        "start": "2026-11-03T10:00:00-06:00",
+        "end": "2026-11-03T12:00:00-06:00"
+      },
+      "to": {
+        "start": "2026-11-04T10:00:00-06:00",
+        "end": "2026-11-04T12:00:00-06:00"
+      },
+      "reasons": [
+        "The move pushes your session from Tuesday to Wednesday.",
+        "Keeping it on Tuesday afternoon would preserve your schedule; the requester's scheduler must confirm a slot."
+      ],
+      "ownerImpact": {
+        "sameDay": false,
+        "sameDuration": true,
+        "personConflicts": []
+      },
+      "alternatives": [
+        {
+          "earliestStart": "2026-11-03T13:15:00-06:00",
+          "latestEnd": "2026-11-03T17:00:00-06:00",
+          "note": "Same day, after the requested session; unverified until re-searched"
+        }
+      ],
+      "evidenceIds": [
+        "appr_example_4",
+        "bk_chen_confocal"
+      ],
+      "dataTimestamp": "2026-10-28T10:00:24-05:00",
+      "decidedBy": "owner"
+    }
+  }
+]
