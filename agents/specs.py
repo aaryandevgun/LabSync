@@ -31,8 +31,8 @@ def _read(agent, name):
 
 
 def tool_specs(agent):
-    """The agent's tools as {name, effect, description, parameters, required}; host-injected args omitted."""
-    return [{k: registry.TOOLS[n][k] for k in ("name", "effect", "description", "parameters", "required")}
+    """The agent's tools as {name, effect, description, input_schema}; host-injected args omitted."""
+    return [{k: registry.TOOLS[n][k] for k in ("name", "effect", "description", "input_schema")}
             for n in registry.tools_for(agent)]
 
 

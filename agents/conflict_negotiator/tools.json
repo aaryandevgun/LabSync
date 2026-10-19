@@ -3,34 +3,66 @@
     "name": "resource_check_qualifications",
     "effect": "read_only",
     "description": "Check whether a person may operate an instrument unsupervised. Read only.\n\nArgs:\n    actor_id (str): the signed-in person.\n    user_id (str): person id, e.g. \"morgan\".\n    resource_id (str): instrument id, e.g. \"confocal_2\".\nReturns:\n    {\"status\": \"ok\", \"eligible\": bool, \"missing\": [qualification ids], \"code\": null | \"NOT_QUALIFIED\"}",
-    "parameters": [
-      "user_id",
-      "resource_id"
-    ],
-    "required": [
-      "user_id",
-      "resource_id"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Person id, e.g. morgan"
+        },
+        "resource_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Instrument or room id, e.g. confocal_1"
+        }
+      },
+      "required": [
+        "user_id",
+        "resource_id"
+      ]
+    }
   },
   {
     "name": "liaison_get_change_request",
     "effect": "read_only",
     "description": "Read an incoming move request as the owner (or core scheduler) sees it. Read only.\nUsed by the Conflict Negotiator to recommend approve / reject / suggest another time.\n\nArgs:\n    actor_id (str): the owner named on the request, or a core scheduler.\n    approval_id (str).\nReturns:\n    {\"status\": \"ok\", \"approval_id\", \"state\", \"impact\": {...}, \"message\"} ; PERMISSION_DENIED otherwise.",
-    "parameters": [
-      "approval_id"
-    ],
-    "required": [
-      "approval_id"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "approval_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Approval request id, e.g. appr_0007"
+        }
+      },
+      "required": [
+        "approval_id"
+      ]
+    }
   },
   {
     "name": "audit_get_activity",
     "effect": "read_scoped",
     "description": "Audit events for a request or entity, scoped to what the actor may see. Read only.\n\nDepartment admins see everything; others see events for their own lab or that they took part in.\n\nArgs:\n    actor_id (str), request_id (str, optional), entity_id (str, optional).\nReturns:\n    {\"status\": \"ok\", \"events\": [{audit_id, actor_id, operation, entity_kind, entity_id, before, after,\n     status, created_at, ...}]} oldest first.",
-    "parameters": [
-      "request_id",
-      "entity_id"
-    ],
-    "required": []
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Correlation id for one request"
+        },
+        "entity_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Any record id to filter audit events by"
+        }
+      },
+      "required": []
+    }
   }
 ]

@@ -35,7 +35,7 @@ def test_agents_load_with_docs_06_instructions_and_filled_placeholders(agent, ac
     assert "{{" not in spec["system_prompt"]
     assert 3 <= len(spec["few_shots"]) <= 5
     assert [t["name"] for t in spec["tools"]] == registry.tools_for(agent)
-    assert all("actor_id" not in t["parameters"] for t in spec["tools"])
+    assert all("actor_id" not in t["input_schema"]["properties"] for t in spec["tools"])
 
 
 def test_lab_prompt_lists_the_live_catalog():

@@ -3,138 +3,448 @@
     "name": "catalog_find_resources",
     "effect": "read_only",
     "description": "List instruments and/or rooms that offer every requested capability. Read only.\n\nArgs:\n    actor_id (str): the signed-in person (catalog data is not lab-restricted).\n    capabilities (list[str]): e.g. [\"gfp_imaging\", \"confocal_imaging\"] or [\"wet_prep\"].\n    resource_type (str): \"instrument\", \"room\" or \"any\".\nReturns:\n    {\"status\": \"ok\", \"resources\": [{\"resource_id\", \"resource_type\", \"name\", \"kind\", \"capabilities\",\n     \"required_qualifications\", \"buffer_minutes\", \"open_local\", \"close_local\"}]}",
-    "parameters": [
-      "capabilities",
-      "resource_type"
-    ],
-    "required": [
-      "capabilities"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "Catalog capability ids, e.g. confocal_imaging"
+        },
+        "resource_type": {
+          "enum": [
+            "instrument",
+            "room",
+            "any"
+          ]
+        }
+      },
+      "required": [
+        "capabilities"
+      ]
+    }
   },
   {
     "name": "resource_check_qualifications",
     "effect": "read_only",
     "description": "Check whether a person may operate an instrument unsupervised. Read only.\n\nArgs:\n    actor_id (str): the signed-in person.\n    user_id (str): person id, e.g. \"morgan\".\n    resource_id (str): instrument id, e.g. \"confocal_2\".\nReturns:\n    {\"status\": \"ok\", \"eligible\": bool, \"missing\": [qualification ids], \"code\": null | \"NOT_QUALIFIED\"}",
-    "parameters": [
-      "user_id",
-      "resource_id"
-    ],
-    "required": [
-      "user_id",
-      "resource_id"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Person id, e.g. morgan"
+        },
+        "resource_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Instrument or room id, e.g. confocal_1"
+        }
+      },
+      "required": [
+        "user_id",
+        "resource_id"
+      ]
+    }
   },
   {
     "name": "scheduler_find_slots",
     "effect": "read_only",
     "description": "Compute ranked booking options for a plan with the deterministic scheduler. Read only.\n\nArgs:\n    actor_id (str): the plan's requester.\n    plan_id (str): from plan_create_draft.\nReturns:\n    {\"status\": \"ok\", \"options\": [...], \"blocked_alternatives\": [...], \"exclusion_counts\": {...},\n     \"supply_readiness\": {...} | null}. Options carry option_id, kind (\"direct\"|\"owner_move\"),\n     times, prep slot, contingent_moves, approvals_required, score and score_breakdown.\n    Option ids are deterministic: the same calendar gives the same ids, so booking_propose can\n    re-check the chosen option. Errors: NOT_FOUND, PERMISSION_DENIED, MISSING_INFORMATION.",
-    "parameters": [
-      "plan_id"
-    ],
-    "required": [
-      "plan_id"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Plan id from plan_create_draft"
+        }
+      },
+      "required": [
+        "plan_id"
+      ]
+    }
   },
   {
     "name": "stock_get_availability",
     "effect": "read_only",
     "description": "Show a lab's own stock for given SKUs. Read only; only members of that lab may look.\n\nArgs:\n    actor_id (str), lab_id (str), sku_ids (list[str]).\nReturns:\n    {\"status\": \"ok\", \"lab_id\", \"items\": [{\"sku_id\", \"on_hand\", \"expiry_dates\"}]} or PERMISSION_DENIED.",
-    "parameters": [
-      "lab_id",
-      "sku_ids"
-    ],
-    "required": [
-      "lab_id",
-      "sku_ids"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lab_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Lab id, e.g. lab_moreno"
+        },
+        "sku_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "lab_id",
+        "sku_ids"
+      ]
+    }
   },
   {
     "name": "supply_quote",
     "effect": "read_only",
     "description": "Synthetic price quote and, if `needed_by` is given, readiness for the actor's lab. Read only.\n\nArgs:\n    actor_id (str).\n    items (list[{\"sku_id\", \"quantity\"}]).\n    needed_by (str, optional): ISO time the supplies must be on hand (e.g. prep start).\nReturns:\n    {\"status\": \"ok\", \"quote\": {...lines, shipping_by_vendor, total_usd, status: \"estimate\"},\n     \"readiness\": {...status, last_safe_order_date, ready_at, code} | null}\n    Prices are synthetic assumptions; this is never a purchase.",
-    "parameters": [
-      "items",
-      "needed_by"
-    ],
-    "required": [
-      "items"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sku_id",
+              "quantity"
+            ],
+            "properties": {
+              "sku_id": {
+                "type": "string"
+              },
+              "quantity": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "needed_by": {
+          "type": "string",
+          "description": "ISO 8601 time with offset the supplies must be on hand"
+        }
+      },
+      "required": [
+        "items"
+      ]
+    }
   },
   {
     "name": "plan_create_draft",
     "effect": "internal_draft_write",
     "description": "Save a validated ParsedGoal as an editable ExperimentPlan draft (internal draft write).\n\nArgs:\n    actor_id (str): the requester; must equal parsed_goal.requesterId and belong to labId.\n    parsed_goal (dict): output of the Lab Agent's request parsing (see agents/ schema).\n    request_id (str, optional): correlation id for the whole request.\nReturns:\n    {\"status\": \"ok\", \"plan_id\", \"state\": \"draft\", \"needs_input\": [...], \"scheduling_request\": {...}}\n    or {\"status\": \"error\", \"code\": \"INVALID_PLAN\", \"errors\": [...]} (nothing written).",
-    "parameters": [
-      "parsed_goal",
-      "request_id"
-    ],
-    "required": [
-      "parsed_goal"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "parsed_goal": {
+          "title": "ParsedGoal",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "labId",
+            "requesterId",
+            "goalSummary",
+            "desiredStart",
+            "preferredEnd",
+            "deadline",
+            "steps",
+            "requiredCapabilities",
+            "supplies",
+            "missingInformation",
+            "confidence"
+          ],
+          "properties": {
+            "labId": {
+              "type": "string"
+            },
+            "requesterId": {
+              "type": "string"
+            },
+            "goalSummary": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "desiredStart": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time",
+              "description": "Start of the preferred window, ISO 8601 with offset"
+            },
+            "preferredEnd": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time",
+              "description": "End of the preferred window"
+            },
+            "deadline": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date-time",
+              "description": "Latest acceptable end of the instrument session"
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "stepId",
+                  "kind",
+                  "title",
+                  "durationMinutes",
+                  "requiredCapabilities",
+                  "dependsOn",
+                  "source",
+                  "required"
+                ],
+                "properties": {
+                  "stepId": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "enum": [
+                      "prep_room",
+                      "instrument",
+                      "analysis"
+                    ]
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "durationMinutes": {
+                    "type": "integer",
+                    "minimum": 15,
+                    "maximum": 480,
+                    "multipleOf": 15
+                  },
+                  "requiredCapabilities": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "dependsOn": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "source": {
+                    "enum": [
+                      "stated",
+                      "inferred"
+                    ]
+                  },
+                  "required": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "requiredCapabilities": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "supplies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "skuId",
+                  "quantity",
+                  "source"
+                ],
+                "properties": {
+                  "skuId": {
+                    "type": "string"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "source": {
+                    "enum": [
+                      "stated",
+                      "inferred"
+                    ]
+                  }
+                }
+              }
+            },
+            "missingInformation": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Correlation id for one request"
+        }
+      },
+      "required": [
+        "parsed_goal"
+      ]
+    }
   },
   {
     "name": "supply_create_order_draft",
     "effect": "proposal_only",
     "description": "Draft supply order requests for a plan's shortfall (docs/01 SupplyRequest.createDraft).\n\nOne OrderProposal per SKU line, state `awaiting_lab_approval`, with lab and fund Approval\nrequests. Nothing is purchased: the furthest an order can go is `approved_request`.\n\nArgs:\n    actor_id (str): the plan's requester.\n    plan_id (str).\n    idempotency_key (str): retries with the same key return the same orders.\nReturns:\n    {\"status\": \"ok\", \"orders\": [...], \"readiness\": {...}} ; \"orders\": [] when stock covers the plan.",
-    "parameters": [
-      "plan_id",
-      "idempotency_key"
-    ],
-    "required": [
-      "plan_id",
-      "idempotency_key"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Plan id from plan_create_draft"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Retries with the same key return the same result"
+        }
+      },
+      "required": [
+        "plan_id",
+        "idempotency_key"
+      ]
+    }
   },
   {
     "name": "booking_propose",
     "effect": "proposal_only",
     "description": "Hold one scheduler option as a ReservationProposal. Proposal only: no booking changes.\n\nThe held slots block other proposals until the proposal is committed, rejected or goes stale.\nOpens Approval requests: one per displaced owner (not sent until liaison_request_change) and\nthe requester's final confirmation.\n\nArgs:\n    actor_id (str): the plan's requester.\n    plan_id (str), option_id (str): an option_id returned by scheduler_find_slots for this plan.\n    idempotency_key (str): retries with the same key return the same proposal.\nReturns:\n    {\"status\": \"ok\", \"proposal_id\", \"state\", \"held\": [...], \"contingent_moves\": [...], \"approvals\": [...]}\n    Errors: NOT_FOUND, PERMISSION_DENIED, UNKNOWN_OPTION, SLOT_STALE.",
-    "parameters": [
-      "plan_id",
-      "option_id",
-      "idempotency_key"
-    ],
-    "required": [
-      "plan_id",
-      "option_id",
-      "idempotency_key"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Plan id from plan_create_draft"
+        },
+        "option_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "option_id returned by scheduler_find_slots"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Retries with the same key return the same result"
+        }
+      },
+      "required": [
+        "plan_id",
+        "option_id",
+        "idempotency_key"
+      ]
+    }
   },
   {
     "name": "liaison_request_change",
     "effect": "proposal_only",
     "description": "Send the owner of a displaced flexible booking a move request (in-app only, never email).\nProposal only: the owner's booking does not change.\n\nArgs:\n    actor_id (str): the proposal's requester.\n    proposal_id (str), booking_id (str): the booking to move (from contingent_moves).\n    message (str, optional): short note shown to the owner.\nReturns:\n    {\"status\": \"ok\", \"approval_id\", \"notification_id\", \"owner_id\", \"impact\": {...}}",
-    "parameters": [
-      "proposal_id",
-      "booking_id",
-      "message"
-    ],
-    "required": [
-      "proposal_id",
-      "booking_id"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "proposal_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Proposal id from booking_propose"
+        },
+        "booking_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Booking id from contingent_moves"
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Short note shown to the owner (in-app only)"
+        }
+      },
+      "required": [
+        "proposal_id",
+        "booking_id"
+      ]
+    }
   },
   {
     "name": "booking_commit_approved",
     "effect": "conditional_booking_write",
     "description": "Commit an authorized proposal: re-validate, then write moved + new bookings atomically or\ncompensate. The only tool that changes confirmed bookings.\n\nArgs:\n    actor_id (str): the proposal's requester (final confirmation already recorded).\n    proposal_id (str).\n    idempotency_key (str): e.g. \"<request_id>:commit:<proposal_id>\"; a retry returns the same receipt.\nReturns:\n    {\"status\": \"ok\", \"receipt\": {...}, \"changes\": [writes], \"replayed\": bool}\n    Errors: UNAUTHORIZED, MISSING_APPROVAL, OWNER_REJECTED, SLOT_STALE, PARTIAL_COMMIT_RECOVERY.",
-    "parameters": [
-      "proposal_id",
-      "idempotency_key"
-    ],
-    "required": [
-      "proposal_id",
-      "idempotency_key"
-    ]
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "proposal_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Proposal id from booking_propose"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Retries with the same key return the same result"
+        }
+      },
+      "required": [
+        "proposal_id",
+        "idempotency_key"
+      ]
+    }
   },
   {
     "name": "audit_get_activity",
     "effect": "read_scoped",
     "description": "Audit events for a request or entity, scoped to what the actor may see. Read only.\n\nDepartment admins see everything; others see events for their own lab or that they took part in.\n\nArgs:\n    actor_id (str), request_id (str, optional), entity_id (str, optional).\nReturns:\n    {\"status\": \"ok\", \"events\": [{audit_id, actor_id, operation, entity_kind, entity_id, before, after,\n     status, created_at, ...}]} oldest first.",
-    "parameters": [
-      "request_id",
-      "entity_id"
-    ],
-    "required": []
+    "input_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Correlation id for one request"
+        },
+        "entity_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Any record id to filter audit events by"
+        }
+      },
+      "required": []
+    }
   }
 ]

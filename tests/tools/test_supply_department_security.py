@@ -212,6 +212,9 @@ def test_registry_covers_docs_06_and_enforces_agent_lists(repo, goal):
     assert spoof["code"] == "INVALID_ARGUMENTS"
     missing = registry.call(repo, "plan_create_draft", {}, "morgan", agent=registry.LAB)
     assert missing["code"] == "INVALID_ARGUMENTS"
+    typed = registry.call(repo, "dept_get_snapshot", {"week_start": "next week"}, "dept_admin",
+                          agent=registry.OPTIMIZER)
+    assert typed["code"] == "INVALID_ARGUMENTS"
     good = registry.call(repo, "plan_create_draft", {"parsed_goal": goal}, "morgan", agent=registry.LAB)
     assert good["status"] == "ok"
 

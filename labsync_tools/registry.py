@@ -13,6 +13,8 @@ Agent names: the three agents Aaryan chose map onto docs/06 as
 import inspect
 
 from . import tools
+from .jsonschema_lite import validate
+from .param_schemas import input_schema
 
 LAB = "lab_agent"
 NEGOTIATOR = "conflict_negotiator"
@@ -62,6 +64,8 @@ TOOLS = {name: {"name": name, "function": getattr(tools, name), "effect": effect
                 "parameters": _params(getattr(tools, name)),
                 "required": _required(getattr(tools, name)), "description": inspect.getdoc(getattr(tools, name))}
          for name, effect, agents in TOOL_TABLE}
+for _tool in TOOLS.values():
+    _tool["input_schema"] = input_schema(_tool["parameters"], _tool["required"])
 
 
 def tools_for(agent):
@@ -82,4 +86,11 @@ def call(repo, name, arguments, actor_id, agent=None):
     if unknown or missing:
         return {"status": "error", "code": "INVALID_ARGUMENTS",
                 "message": "Unknown arguments: %s; missing: %s" % (unknown, missing)}
+    # Type-check arguments; parsed_goal is left to plan_create_draft, which audits rejected plans.
+    shallow = dict(TOOLS[name]["input_schema"], properties={
+        k: v for k, v in TOOLS[name]["input_schema"]["properties"].items() if k != "parsed_goal"})
+    errors = validate({k: v for k, v in arguments.items() if k != "parsed_goal"},
+                      dict(shallow, required=[r for r in shallow["required"] if r != "parsed_goal"]))
+    if errors:
+        return {"status": "error", "code": "INVALID_ARGUMENTS", "message": "; ".join(errors)}
     return TOOLS[name]["function"](repo, actor_id=actor_id, **arguments)
